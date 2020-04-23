@@ -1,15 +1,10 @@
-﻿using Argus.Extensions;
-using Avalon.Common.Colors;
+﻿using Avalon.Common.Colors;
 using Avalon.Common.Interfaces;
-using ICSharpCode.AvalonEdit.Indentation;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Media;
 
@@ -38,7 +33,11 @@ namespace Avalon
         public string Text
         {
             get => LogEditor.Text;
-            set => LogEditor.Text = value;
+            set
+            {
+                value = RemovePassword(value);
+                LogEditor.Text = value;
+            }
         }
 
         /// <summary>
@@ -228,6 +227,12 @@ namespace Avalon
                     case "Remove Battle":
                         RemoveBattle();
                         break;
+                    case "Remove Directions":
+                        RemoveDirections();
+                        break;
+                    case "Remove Maccus":
+                        RemoveLinesContaining("Maccus");
+                        break;
                     default:
                         SetError($"Status: {desc} was not found.");
                         return;
@@ -243,6 +248,38 @@ namespace Avalon
 
             SetStatus($"Status: {desc} completed.");
             e.Handled = true;
+        }
+
+        /// <summary>
+        /// Removes all lines that contain the phrase (case insenstive).  This should be used for single action
+        /// filters since a loop over all the lines will occur (which is inefficient for multiple action filters).
+        /// </summary>
+        private void RemoveLinesContaining(string text)
+        {
+            var sb = Argus.Memory.StringBuilderPool.Take();
+
+            try
+            {
+                var lines = GetLines();
+
+                foreach (string line in lines)
+                {
+                    if (!line.Contains(text, StringComparison.OrdinalIgnoreCase))
+                    {
+                        sb.AppendLine(line);
+                    }
+                }
+
+                LogEditor.Text = sb.ToString().Trim();
+            }
+            catch (Exception ex)
+            {
+                SetError($"Error: {ex.Message}");
+            }
+            finally
+            {
+                Argus.Memory.StringBuilderPool.Return(sb);
+            }
         }
 
         /// <summary>
@@ -365,6 +402,61 @@ namespace Avalon
             LogEditor.Text = text;
         }
 
+        private void RemoveDirections()
+        {
+            var lines = GetLines();
+            var sb = Argus.Memory.StringBuilderPool.Take();
+            var list = new List<string>();
+
+            list.Add("u");
+            list.Add("up");
+            list.Add("d");
+            list.Add("down");
+            list.Add("n");
+            list.Add("north");
+            list.Add("s");
+            list.Add("south");
+            list.Add("e");
+            list.Add("east");
+            list.Add("w");
+            list.Add("west");
+            list.Add("northeast");
+            list.Add("ne");
+            list.Add("northwest");
+            list.Add("nw");
+            list.Add("southeast");
+            list.Add("se");
+            list.Add("southwest");
+            list.Add("southwest");
+            list.Add("Alas, you cannot go that way.");
+
+            foreach (string line in lines)
+            {
+                bool found = false;
+
+               // Verbatim filters
+                foreach (string filter in list)
+                {
+                    if (string.Equals(line, filter, StringComparison.OrdinalIgnoreCase))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found)
+                {
+                    continue;
+                }
+
+                sb.AppendLine(line);
+            }
+
+            LogEditor.Text = sb.ToString();
+            Argus.Memory.StringBuilderPool.Return(sb);
+
+        }
+
         /// <summary>
         /// Remove toasts from the output.
         /// </summary>
@@ -373,6 +465,9 @@ namespace Avalon
             LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?([\[\(](.*?)[\]\)])?[ ]{0,}([\w'-]+) got (.*?) by (.*?) ([\[\(] (.*?) [\]\)])?[ ]{0,}([\(]Arena[\)])?", "");
         }
 
+        /// <summary>
+        /// Removes battle echos.
+        /// </summary>
         private void RemoveBattle()
         {
             var lines = GetLines();
@@ -423,13 +518,20 @@ namespace Avalon
             filterList.Add("experience points.");
             filterList.Add("coins from the corpse");
             filterList.Add("coins for your sacrifice");
+            filterList.Add("death cry.");
 
             foreach (string line in lines)
             {
                 bool found = false;
 
-                // Damage
+                // Damage by me to someone else
                 if (Regex.IsMatch(line, @"^(You|Your)(\s)?(.*?)?(miss(es)?|scratch(es)?|graze(s)?|hit(s)?|injure(s)?|wound(s)?|maul(s)?|decimate(s)?|devastate(s)?|maim(s)?|MUTILATE(S)?|DISEMBOWEL(S)?|DISMEMBER(S)?|MASSACRE(S)?|MANGLE(S)?|\*\*\* DEMOLISH(ES)? \*\*\*|\*\*\* DEVASTATES \*\*\*|=== OBLITERATE(S)? ===|>>> ANNIHILATE(S)? <<<|<<< ERADICATE(S)? >>>|(does|do) HIDEOUS things to|(does|do) GHASTLY things to|(does|do) UNSPEAKABLE things to) (.*?)(\.|\!)"))
+                {
+                    continue;
+                }
+
+                // Damage by someone else to me
+                if (Regex.IsMatch(line, @"^(.*?)?(miss(es)?|scratch(es)?|graze(s)?|hit(s)?|injure(s)?|wound(s)?|maul(s)?|decimate(s)?|devastate(s)?|maim(s)?|MUTILATE(S)?|DISEMBOWEL(S)?|DISMEMBER(S)?|MASSACRE(S)?|MANGLE(S)?|\*\*\* DEMOLISH(ES)? \*\*\*|\*\*\* DEVASTATES \*\*\*|=== OBLITERATE(S)? ===|>>> ANNIHILATE(S)? <<<|<<< ERADICATE(S)? >>>|(does|do) HIDEOUS things to|(does|do) GHASTLY things to|(does|do) UNSPEAKABLE things to) (.*?)(\.|\!)"))
                 {
                     continue;
                 }
@@ -460,6 +562,38 @@ namespace Avalon
 
             LogEditor.Text = sb.ToString();
             Argus.Memory.StringBuilderPool.Return(sb);
+        }
+
+        /// <summary>
+        /// Removes the password line from the text provided.
+        /// </summary>
+        private string RemovePassword(string text)
+        {
+            var sb = Argus.Memory.StringBuilderPool.Take();
+
+            try
+            {
+                var lines = text.Replace("\r", "").Split('\n');
+
+                foreach (string line in lines)
+                {
+                    if (!line.Contains("Password:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        sb.AppendLine(line);
+                    }
+                }
+
+                return sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                SetError($"Error: {ex.Message}");
+                return text;
+            }
+            finally
+            {
+                Argus.Memory.StringBuilderPool.Return(sb);
+            }
         }
 
         private void FindAndReplace(object sender, RoutedEventArgs e)

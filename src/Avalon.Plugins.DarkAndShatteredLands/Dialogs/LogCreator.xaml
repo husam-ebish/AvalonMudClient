@@ -11,7 +11,7 @@
         ui:WindowHelper.UseModernWindowStyle="True"
         x:Name="LogCreator" TextOptions.TextFormattingMode="Ideal"
         ui:TitleBar.Background="#2D2D30" Background="#171717" BorderBrush="#007ACC"
-        Title="Log Creator" Height="600" Width="800">
+        Title="Log Creator" Height="595" Width="800">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
@@ -33,8 +33,8 @@
             BorderBrush="White">
         </avalonedit:TextEditor>
 
-        <StackPanel Grid.Row="0" Grid.Column="1"
-            Orientation="Vertical">
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
+            <Label Foreground="White" Margin="5,5,0,5">Individual Actions</Label>
             <Button Tag="Remove Prompts" Click="ButtonHandler_Click"
                     ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" 
                     BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Prompts</Button>
@@ -43,7 +43,6 @@
                     ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" 
                     BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Channels</Button>
 
-            <!-- TODO -->
             <Button Tag="Remove Battle" Click="ButtonHandler_Click"
                     ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" 
                     BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Battle</Button>
@@ -55,6 +54,10 @@
             <Button Tag="Remove Double Blank Lines" Click="ButtonHandler_Click"
                     ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" 
                     BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Double Blank Lines</Button>
+
+            <Button Tag="Remove Directions" Click="ButtonHandler_Click"
+                    ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" 
+                    BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Directions</Button>
             
             <!-- TODO -->
             <Button Tag="Find and Replace" Click="ButtonHandler_Click"
@@ -70,6 +73,25 @@
             <Button Tag="Remove Lines that Contain" Click="ButtonHandler_Click" 
                     ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch"
                     BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Lines that Contain</Button>
+
+            <Label Foreground="White" Margin="5,5,0,5">Prebuilt Actions</Label>
+
+            <Button Tag="Battle Log" Click="ButtonHandler_Click" 
+                    ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch"
+                    BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Battle Log</Button>
+
+            <Button Tag="RP Log" Click="ButtonHandler_Click" 
+                    ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch"
+                    BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">RP Log</Button>
+
+            <Button Tag="Communication Log" Click="ButtonHandler_Click" 
+                    ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch"
+                    BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Communication Log</Button>
+
+            <Button Tag="Remove Maccus" Click="ButtonHandler_Click" 
+                    ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch"
+                    BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Maccus</Button>
+
         </StackPanel>
 
         <DockPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
