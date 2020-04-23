@@ -13,6 +13,8 @@ namespace Avalon.Common.Interfaces
     {
         ProfileSettings ProfileSettings { get; }
 
+        AvalonSettings ClientSettings { get; }
+
         string GetVariable(string key);
 
         void SetVariable(string key, string value);

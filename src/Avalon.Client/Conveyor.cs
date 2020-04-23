@@ -563,5 +563,10 @@ namespace Avalon
         /// The settings for the current profile that is loaded.
         /// </summary>
         public ProfileSettings ProfileSettings => App.Settings.ProfileSettings;
+
+        /// <summary>
+        /// Retuns the client settings that are specific to the workstation
+        /// </summary>
+        public AvalonSettings ClientSettings => App.Settings.AvalonSettings;
     }
 }
