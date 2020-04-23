@@ -121,6 +121,10 @@
                             </MenuItem>                            
                         </MenuItem>
                         <MenuItem Header="_Tools">
+                            <MenuItem x:Name="MenuItemDeveloperTools" Header="Developer Tools">
+                                <MenuItem Header="Manually Load Plugin" Click="MenuItemManuallyLoadPlugin_Click">
+                                </MenuItem>
+                            </MenuItem>
                             <MenuItem Header="Send _Text to Game" Click="MenuItemSendTextToGameAsync_Click">
                                 <MenuItem.Icon>
                                     <ui:SymbolIcon Symbol="Send" />
