@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using System.Windows.Media;
 
 namespace Avalon
@@ -88,7 +89,8 @@ namespace Avalon
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void ButtonCancel_OnClick(object sender, RoutedEventArgs e)
-        {            
+        {
+            SetIdle();
             this.Close();
         }
 
@@ -99,8 +101,36 @@ namespace Avalon
         /// <param name="e"></param>
         private void ButtonSave_OnClick(object sender, RoutedEventArgs e)
         {
+            SetProcessing("Status: Please choose where you would like to save your file.");
 
-            ClearError();
+            var sfd = new SaveFileDialog
+            {
+                Title = "Save Log File",
+                ValidateNames = true,
+                AutoUpgradeEnabled = true,
+            };
+
+            sfd.ShowDialog();
+
+            if (string.IsNullOrWhiteSpace(sfd.FileName))
+            {
+                SetStatus("Status: Log Save Cancelled.");
+                return;
+            }
+
+            try
+            {
+                SetProcessing($"Status: Saving to {sfd.FileName}");
+                System.IO.File.WriteAllText(sfd.FileName, LogEditor.Text, Encoding.ASCII);
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                // On error show them the error but don't close the log.
+                SetError($"Error: {ex.Message}");
+                return;
+            }
+
             this.Close();
         }
 
@@ -123,28 +153,122 @@ namespace Avalon
         public void SetProcessing(string text)
         {
             StatusText = text;
-            this.BorderBrush = Brushes.Green;
-            TextBlockStatus.Background = Brushes.Green;
-            StatusBarWindow.Background = Brushes.Green;
+            this.BorderBrush = Brushes.Orange;
+            TextBlockStatus.Background = Brushes.Orange;
+            StatusBarWindow.Background = Brushes.Orange;
         }
 
         /// <summary>
         /// Resets the color of the form and the text on the status bar to the default.
         /// </summary>
-        public void ClearError()
+        public void SetIdle()
         {
-            StatusText = "";
+            StatusText = "Status: Idle";
             this.BorderBrush = _defaultStatusColor;
             TextBlockStatus.Background = _defaultStatusColor;
             StatusBarWindow.Background = _defaultStatusColor;
         }
 
         /// <summary>
-        /// Removes all lines that start with a string pattern.
+        /// Resets the color of the form and the text on the status bar to the default.
+        /// </summary>
+        public void SetStatus(string text)
+        {
+            StatusText = $"Status: {text}";
+            this.BorderBrush = _defaultStatusColor;
+            TextBlockStatus.Background = _defaultStatusColor;
+            StatusBarWindow.Background = _defaultStatusColor;
+        }
+
+        /// <summary>
+        /// Gets the lines in the text editor as an array and clears the shared StringBuilder array.
+        /// </summary>
+        public string[] GetLines()
+        {
+            return LogEditor.Text.Replace("\r", "").Split('\n');
+        }
+
+        /// <summary>
+        /// Shared button handler.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void ButtonRemoveLinesThatStartWith_Click(object sender, RoutedEventArgs e)
+        private async void ButtonHandler_Click(object sender, RoutedEventArgs e)
+        {
+            var fe = e.Source as FrameworkElement;
+            string desc = fe.Tag as string;
+
+            SetProcessing($"Status: Executing {desc}");
+
+            try
+            {
+                switch (desc)
+                {
+                    case "Remove Prompts":
+                        RemovePrompts();
+                        break;
+                    case "Remove Channels":
+                        RemoveChannels();
+                        break;
+                    case "Remove Toasts":
+                        RemoveToasts();
+                        break;
+                    case "Remove Double Blank Lines":
+                        RemoveDoubleBlankLines();
+                        break;
+                    case "Remove Lines that Start With":
+                        RemoveLinesThatStartWith();
+                        break;
+                    case "Remove Lines that End With":
+                        RemoveLinesThatEndWith();
+                        break;
+                    case "Remove Lines that Contain":
+                        RemoveLinesThatContain();
+                        break;
+                    case "Remove Battle":
+                        RemoveBattle();
+                        break;
+                    default:
+                        SetError($"Status: {desc} was not found.");
+                        return;
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                SetError($"Status: Error - {ex.Message}");
+                return;
+            }
+
+            SetStatus($"Status: {desc} completed.");
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Removes prompts from the output.
+        /// </summary>
+        public void RemovePrompts()
+        {
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"\<(\d+)/(\d+)hp (\d+)/(\d+)m (\d+)/(\d+)mv \((\d+)\|(\w+)\) \((.*?)\) \((.*?)\) (.*?) (.*?)\>", "");
+        }
+
+        /// <summary>
+        /// Removes all channels.
+        /// </summary>
+        private void RemoveChannels()
+        {
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?(\[ .* \] )?([\w'-]+|The ghost of [\w'-]+|\(An Imm\)|\(Imm\) [\w'-]+|\(Wizi@\d\d\) \(Imm\) [\w'-]+) (\bclan gossip(s?)\b|\bclan(s?)\b|\bgossip(s?)\b|\bask(s?)\b|\banswers(s?)\b|\btell(s?)\b|\bBloodbath(s?)\b|\bpray(s?)\b|\bgrats\b|\bauction(s?)\b|\bquest(s?)\b|\bradio(s?)\b|\bimm(s?)\b).*'$", "");
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?(\[ .* \] )?(?!.*OOC).*Kingdom: .*$", "");
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"\((Admin|Coder)\) \(Imm\) [\w'-]+:", "");
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?(\(.*\)?)?([\w'-]+|The ghost of [\w'-]+|\(An Imm\)|\(Imm\) [\w'-]+) (OOC|\[Newbie\]).*$", "");
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^\((Shalonesti|OOC Shalonesti|Clave|OOC Clave)\).*$", "");
+        }
+
+        /// <summary>
+        /// Removes all lines that start with a string pattern.
+        /// </summary>
+        private async void RemoveLinesThatStartWith()
         {
             string text = await _interp.Conveyor.InputBox("Enter text:", "Remove Lines that Start With");
 
@@ -153,7 +277,7 @@ namespace Avalon
                 return;
             }
 
-            var lines = LogEditor.Text.Replace("\r", "").Split('\n');
+            var lines = GetLines();
             var sb = Argus.Memory.StringBuilderPool.Take();
 
             foreach (string line in lines)
@@ -171,9 +295,7 @@ namespace Avalon
         /// <summary>
         /// Removes all lines that end with a set of text.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private async void ButtonRemoveLinesThatEndWith_Click(object sender, RoutedEventArgs e)
+        private async void RemoveLinesThatEndWith()
         {
             string text = await _interp.Conveyor.InputBox("Enter text:", "Remove Lines that End With");
 
@@ -182,7 +304,7 @@ namespace Avalon
                 return;
             }
 
-            var lines = LogEditor.Text.Replace("\r", "").Split('\n');
+            var lines = GetLines();
             var sb = Argus.Memory.StringBuilderPool.Take();
 
             foreach (string line in lines)
@@ -200,9 +322,7 @@ namespace Avalon
         /// <summary>
         /// Removes all lines that contains a set of text.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private async void ButtonRemoveLinesThatContain_Click(object sender, RoutedEventArgs e)
+        private async void RemoveLinesThatContain()
         {
             string text = await _interp.Conveyor.InputBox("Enter text:", "Remove Lines that Contain");
 
@@ -211,7 +331,7 @@ namespace Avalon
                 return;
             }
 
-            var lines = LogEditor.Text.Replace("\r", "").Split('\n');
+            var lines = GetLines();
             var sb = Argus.Memory.StringBuilderPool.Take();
 
             foreach (string line in lines)
@@ -229,9 +349,7 @@ namespace Avalon
         /// <summary>
         /// Removes two blank lines in a row and replaces them with one.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ButtonRemoveDoubleBlankLines_Click(object sender, RoutedEventArgs e)
+        private void RemoveDoubleBlankLines()
         {
             string text = LogEditor.Text;
             text = text.Replace("\r\n", "\n");
@@ -243,52 +361,109 @@ namespace Avalon
                 containsPattern = text.Contains("\n\n\n");
             }
 
-            text = text.Replace("\n", "\r\n");            
+            text = text.Replace("\n", "\r\n");
             LogEditor.Text = text;
-        }
-
-        /// <summary>
-        /// Remove the standard prompt from the output
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ButtonRemovePrompts_Click(object sender, RoutedEventArgs e)
-        {
-            LogEditor.Text = Regex.Replace(LogEditor.Text, @"\<(\d+)/(\d+)hp (\d+)/(\d+)m (\d+)/(\d+)mv \((\d+)\|(\w+)\) \((.*?)\) \((.*?)\) (.*?) (.*?)\>", "");
         }
 
         /// <summary>
         /// Remove toasts from the output.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ButtonRemoveToasts_Click(object sender, RoutedEventArgs e)
+        private void RemoveToasts()
         {
             LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?([\[\(](.*?)[\]\)])?[ ]{0,}([\w'-]+) got (.*?) by (.*?) ([\[\(] (.*?) [\]\)])?[ ]{0,}([\(]Arena[\)])?", "");
         }
 
-        /// <summary>
-        /// Removes all channels.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ButtonRemoveChannels_Click(object sender, RoutedEventArgs e)
+        private void RemoveBattle()
         {
-            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?(\[ .* \] )?([\w'-]+|The ghost of [\w'-]+|\(An Imm\)|\(Imm\) [\w'-]+|\(Wizi@\d\d\) \(Imm\) [\w'-]+) (\bclan gossip(s?)\b|\bclan(s?)\b|\bgossip(s?)\b|\bask(s?)\b|\banswers(s?)\b|\btell(s?)\b|\bBloodbath(s?)\b|\bpray(s?)\b|\bgrats\b|\bauction(s?)\b|\bquest(s?)\b|\bradio(s?)\b|\bimm(s?)\b).*'$", "");
-            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?(\[ .* \] )?(?!.*OOC).*Kingdom: .*$", "");
-            LogEditor.Text = Regex.Replace(LogEditor.Text, @"\((Admin|Coder)\) \(Imm\) [\w'-]+:", "");
-            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?(\(.*\)?)?([\w'-]+|The ghost of [\w'-]+|\(An Imm\)|\(Imm\) [\w'-]+) (OOC|\[Newbie\]).*$", "");
-            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^\((Shalonesti|OOC Shalonesti|Clave|OOC Clave)\).*$", "");
+            var lines = GetLines();
+            var sb = Argus.Memory.StringBuilderPool.Take();
+            var filterList = new List<string>();
+
+            filterList.Add("You dodge");
+            filterList.Add("You parry");
+            filterList.Add("dodges your attack");
+            filterList.Add("parries your attack");
+            filterList.Add("draws life from");
+            filterList.Add("draws energy from");
+            filterList.Add("is knocked to the ground");
+            filterList.Add("fumes and dissolves");
+            filterList.Add("is pitted and etched");
+            filterList.Add("is corroded into scrap");
+            filterList.Add("corrodes and breaks");
+            filterList.Add("is burned into waste");
+            filterList.Add("turns blue and shivers");
+            filterList.Add("freezes and shatters");
+            filterList.Add("is blinded by smoke");
+            filterList.Add("Your eyes tear up from smoke");
+            filterList.Add("ignites and burns!");
+            filterList.Add("bubbles and boils!");
+            filterList.Add("crackles and burns!");
+            filterList.Add("smokes and chars!");
+            filterList.Add("sparks and sputters!");
+            filterList.Add("blackens and crisps!");
+            filterList.Add("melts and drips!");
+            filterList.Add("You feel poison coursing through your veins.");
+            filterList.Add("looks very ill.");
+            filterList.Add("Your muscles stop responding.");
+            filterList.Add("overloads and explodes.");
+            filterList.Add("is fused into a worthless lump.");
+            filterList.Add("is blinded by the intense heat");
+            filterList.Add("You shut your eyes to prevent them from melting");
+            filterList.Add("is exhausted by the extreme heat");
+            filterList.Add("You are exhausted from the extreme heat");
+            filterList.Add("You feel so very tired and sleepy");
+            filterList.Add("falls to the floor in a deep sleep.");
+            filterList.Add("You feel slow and lethargic");
+            filterList.Add("begins to move very slowly.");
+            filterList.Add("You are paralyzed");
+            filterList.Add("windpipe right out of his throat");
+            filterList.Add("is DEAD!!");
+            filterList.Add("You have almost completed your QUEST!");
+            filterList.Add("Return to the questmaster before your time runs out!");
+            filterList.Add("experience points.");
+            filterList.Add("coins from the corpse");
+            filterList.Add("coins for your sacrifice");
+
+            foreach (string line in lines)
+            {
+                bool found = false;
+
+                // Damage
+                if (Regex.IsMatch(line, @"^(You|Your)(\s)?(.*?)?(miss(es)?|scratch(es)?|graze(s)?|hit(s)?|injure(s)?|wound(s)?|maul(s)?|decimate(s)?|devastate(s)?|maim(s)?|MUTILATE(S)?|DISEMBOWEL(S)?|DISMEMBER(S)?|MASSACRE(S)?|MANGLE(S)?|\*\*\* DEMOLISH(ES)? \*\*\*|\*\*\* DEVASTATES \*\*\*|=== OBLITERATE(S)? ===|>>> ANNIHILATE(S)? <<<|<<< ERADICATE(S)? >>>|(does|do) HIDEOUS things to|(does|do) GHASTLY things to|(does|do) UNSPEAKABLE things to) (.*?)(\.|\!)"))
+                {
+                    continue;
+                }
+
+                // Condition
+                if (Regex.IsMatch(line, @"^(.*?)? (is in excellent condition|has a few scratches|has some small wounds and bruises|has quite a few wounds|has some big nasty wounds and scratches|looks pretty hurt|is in awful condition|is bleeding to death)."))
+                {
+                    continue;
+                }
+
+                // Verbatim filters
+                foreach (string filter in filterList)
+                {
+                    if (line.Contains(filter))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found)
+                {
+                    continue;
+                }
+
+                sb.AppendLine(line);
+            }
+
+            LogEditor.Text = sb.ToString();
+            Argus.Memory.StringBuilderPool.Return(sb);
         }
 
-        private void ButtonRemoveBattle_Click(object sender, RoutedEventArgs e)
+        private void FindAndReplace(object sender, RoutedEventArgs e)
         {
-            this.StatusText = "Not Implemented.";
-        }
-
-        private void ButtonFindAndReplace_Click(object sender, RoutedEventArgs e)
-        {
-            this.StatusText = "Not Implemented.";
         }
     }
 }

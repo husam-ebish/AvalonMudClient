@@ -35,39 +35,39 @@
 
         <StackPanel Grid.Row="0" Grid.Column="1"
             Orientation="Vertical">
-            <Button x:Name="ButtonRemovePrompts" Click="ButtonRemovePrompts_Click"
+            <Button Tag="Remove Prompts" Click="ButtonHandler_Click"
                     ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" 
                     BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Prompts</Button>
 
-            <Button x:Name="ButtonRemoveChannels" Click="ButtonRemoveChannels_Click"
+            <Button Tag="Remove Channels" Click="ButtonHandler_Click"
                     ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" 
                     BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Channels</Button>
 
             <!-- TODO -->
-            <Button x:Name="ButtonRemoveBattle" Click="ButtonRemoveBattle_Click"
+            <Button Tag="Remove Battle" Click="ButtonHandler_Click"
                     ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" 
                     BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Battle</Button>
 
-            <Button x:Name="ButtonRemoveToasts" Click="ButtonRemoveToasts_Click"
+            <Button Tag="Remove Toasts" Click="ButtonHandler_Click"
                     ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch"
                     BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Toasts</Button>
             
-            <Button x:Name="ButtonRemoveDoubleBlankLines" Click="ButtonRemoveDoubleBlankLines_Click" 
+            <Button Tag="Remove Double Blank Lines" Click="ButtonHandler_Click"
                     ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" 
                     BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Double Blank Lines</Button>
             
             <!-- TODO -->
-            <Button x:Name="ButtonFindAndReplace" Click="ButtonFindAndReplace_Click"
+            <Button Tag="Find and Replace" Click="ButtonHandler_Click"
                     ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch"
                     BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Find and Replace</Button>
 
-            <Button x:Name="ButtonRemoveLinesThatStartWith" Click="ButtonRemoveLinesThatStartWith_Click" 
+            <Button Tag="Remove Lines that Start With" Click="ButtonHandler_Click" 
                     ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" 
                     BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Lines that Start With</Button>
-            <Button x:Name="ButtonRemoveLinesThatEndWith" Click="ButtonRemoveLinesThatEndWith_Click"
+            <Button Tag="Remove Lines that End With" Click="ButtonHandler_Click"
                     ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" 
                     BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Lines that End With</Button>
-            <Button x:Name="ButtonRemoveLinesThatContain" Click="ButtonRemoveLinesThatContain_Click" 
+            <Button Tag="Remove Lines that Contain" Click="ButtonHandler_Click" 
                     ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch"
                     BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Lines that Contain</Button>
         </StackPanel>
@@ -75,7 +75,7 @@
         <DockPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Top">
                 <Button ui:ControlHelper.CornerRadius="0" Margin="5,10,5,10" Width="100" x:Name="ButtonCancel" Click="ButtonCancel_OnClick">Cancel</Button>
-                <Button ui:ControlHelper.CornerRadius="0" Margin="5,10,5,10" Width="100" x:Name="ButtonSave" Click="ButtonSave_OnClick" Visibility="{Binding SaveButtonVisible}">Save</Button>
+                <Button ui:ControlHelper.CornerRadius="0" Margin="5,10,5,10" Width="100" x:Name="ButtonSave" Click="ButtonSave_OnClick" Visibility="{Binding SaveButtonVisible}">Save File</Button>
             </StackPanel>
             <StatusBar x:Name="StatusBarWindow" Background="#007ACC" Foreground="White">
                 <TextBlock x:Name="TextBlockStatus" Text="The dialog will assist in creating a log from the game." TextWrapping="NoWrap"></TextBlock>
