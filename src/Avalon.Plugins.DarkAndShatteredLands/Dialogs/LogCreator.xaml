@@ -15,7 +15,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
-            <ColumnDefinition Width="200"></ColumnDefinition>
+            <ColumnDefinition Width="220"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
@@ -25,26 +25,41 @@
         <!-- 1 pixel left margin was so the left border of the window will render -->
         <avalonedit:TextEditor Grid.Row="0" Grid.Column="0"
             x:Name="LogEditor" ShowLineNumbers="True" WordWrap="False"
-            FontFamily="Consolas" FontSize="10pt" IsReadOnly="False"
+            FontFamily="Consolas" FontSize="12pt" IsReadOnly="False"
             HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible"
             Padding="0,0,0,0" Margin="1,0,0,0" 
-            Background="#1E1E1E" Foreground="#DCDCDC"
+            Background="Black" Foreground="#DCDCDC"
             ScrollViewer.PanningMode="VerticalOnly"            
             BorderBrush="White">
         </avalonedit:TextEditor>
 
         <StackPanel Grid.Row="0" Grid.Column="1"
             Orientation="Vertical">
-            <Button x:Name="ButtonRemovePrompts" ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Prompts</Button>
-            <Button x:Name="ButtonRemovePublicChannels" ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Public Channels</Button>
-            <Button x:Name="ButtonRemoveBattle" ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Battle</Button>
-            <Button x:Name="ButtonRemoveToasts" ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Toasts</Button>
+            <Button x:Name="ButtonRemovePrompts" Click="ButtonRemovePrompts_Click"
+                    ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" 
+                    BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Prompts</Button>
+
+            <Button x:Name="ButtonRemoveChannels" Click="ButtonRemoveChannels_Click"
+                    ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" 
+                    BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Channels</Button>
+
+            <!-- TODO -->
+            <Button x:Name="ButtonRemoveBattle" Click="ButtonRemoveBattle_Click"
+                    ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" 
+                    BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Battle</Button>
+
+            <Button x:Name="ButtonRemoveToasts" Click="ButtonRemoveToasts_Click"
+                    ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch"
+                    BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Toasts</Button>
+            
             <Button x:Name="ButtonRemoveDoubleBlankLines" Click="ButtonRemoveDoubleBlankLines_Click" 
                     ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" 
                     BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Remove Double Blank Lines</Button>
             
             <!-- TODO -->
-            <Button x:Name="ButtonFindAndReplace" ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Find and Replace</Button>
+            <Button x:Name="ButtonFindAndReplace" Click="ButtonFindAndReplace_Click"
+                    ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch"
+                    BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">Find and Replace</Button>
 
             <Button x:Name="ButtonRemoveLinesThatStartWith" Click="ButtonRemoveLinesThatStartWith_Click" 
                     ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" 

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,6 +19,8 @@ namespace Avalon
     /// </summary>
     public partial class LogCreatorWindow : Window
     {
+        // [ (C)ontinue, (R)efresh, (B)ack, (H)elp, (E)nd, (T)op, (Q)uit, or RETURN ]:
+        // -->
 
         /// <summary>
         /// The text for the status bar.
@@ -65,6 +68,9 @@ namespace Avalon
 
             // Get rid of the auto indenting.
             this.LogEditor.TextArea.IndentationStrategy = null;
+
+            // Set the font from the client settings.
+            this.LogEditor.FontSize = _interp.Conveyor.ClientSettings.TerminalFontSize;
         }
 
         /// <summary>
@@ -108,6 +114,18 @@ namespace Avalon
             this.BorderBrush = Brushes.Red;
             TextBlockStatus.Background = Brushes.Red;
             StatusBarWindow.Background = Brushes.Red;
+        }
+
+        /// <summary>
+        /// Settings the window as processing.
+        /// </summary>
+        /// <param name="text"></param>
+        public void SetProcessing(string text)
+        {
+            StatusText = text;
+            this.BorderBrush = Brushes.Green;
+            TextBlockStatus.Background = Brushes.Green;
+            StatusBarWindow.Background = Brushes.Green;
         }
 
         /// <summary>
@@ -217,16 +235,60 @@ namespace Avalon
         {
             string text = LogEditor.Text;
             text = text.Replace("\r\n", "\n");
-            bool containsPattern = text.Contains("\n\n");
+            bool containsPattern = text.Contains("\n\n\n");
 
             while (containsPattern)
             {
-                text = text.Replace("\n\n", "\n");
-                containsPattern = text.Contains("\n\n");
+                text = text.Replace("\n\n\n", "\n\n");
+                containsPattern = text.Contains("\n\n\n");
             }
 
             text = text.Replace("\n", "\r\n");            
             LogEditor.Text = text;
+        }
+
+        /// <summary>
+        /// Remove the standard prompt from the output
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ButtonRemovePrompts_Click(object sender, RoutedEventArgs e)
+        {
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"\<(\d+)/(\d+)hp (\d+)/(\d+)m (\d+)/(\d+)mv \((\d+)\|(\w+)\) \((.*?)\) \((.*?)\) (.*?) (.*?)\>", "");
+        }
+
+        /// <summary>
+        /// Remove toasts from the output.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ButtonRemoveToasts_Click(object sender, RoutedEventArgs e)
+        {
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?([\[\(](.*?)[\]\)])?[ ]{0,}([\w'-]+) got (.*?) by (.*?) ([\[\(] (.*?) [\]\)])?[ ]{0,}([\(]Arena[\)])?", "");
+        }
+
+        /// <summary>
+        /// Removes all channels.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ButtonRemoveChannels_Click(object sender, RoutedEventArgs e)
+        {
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?(\[ .* \] )?([\w'-]+|The ghost of [\w'-]+|\(An Imm\)|\(Imm\) [\w'-]+|\(Wizi@\d\d\) \(Imm\) [\w'-]+) (\bclan gossip(s?)\b|\bclan(s?)\b|\bgossip(s?)\b|\bask(s?)\b|\banswers(s?)\b|\btell(s?)\b|\bBloodbath(s?)\b|\bpray(s?)\b|\bgrats\b|\bauction(s?)\b|\bquest(s?)\b|\bradio(s?)\b|\bimm(s?)\b).*'$", "");
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?(\[ .* \] )?(?!.*OOC).*Kingdom: .*$", "");
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"\((Admin|Coder)\) \(Imm\) [\w'-]+:", "");
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?(\(.*\)?)?([\w'-]+|The ghost of [\w'-]+|\(An Imm\)|\(Imm\) [\w'-]+) (OOC|\[Newbie\]).*$", "");
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^\((Shalonesti|OOC Shalonesti|Clave|OOC Clave)\).*$", "");
+        }
+
+        private void ButtonRemoveBattle_Click(object sender, RoutedEventArgs e)
+        {
+            this.StatusText = "Not Implemented.";
+        }
+
+        private void ButtonFindAndReplace_Click(object sender, RoutedEventArgs e)
+        {
+            this.StatusText = "Not Implemented.";
         }
     }
 }
