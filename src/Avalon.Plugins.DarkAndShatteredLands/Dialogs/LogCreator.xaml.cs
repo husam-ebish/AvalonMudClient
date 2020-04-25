@@ -833,6 +833,19 @@ namespace Avalon
             await RemoveLinesThatContain(" : modifies");
             await RemoveLinesThatStartWith("You aren't currently on a quest.");
             await RemoveLinesThatStartWith("There is less than a hour remaining until you can go on another quest.");
+            await RemoveLinesThatStartWith("Master account:");
+            await RemoveLinesThatStartWith("Personal Name: ");
+            await RemoveLinesThatStartWith("E-mail: ");
+            await RemoveLinesThatContain("Dark and Shattered Lands: ");
+
+            for (int i = 1;i < 250; i++)
+            {
+                await RemoveLinesThatStartWith($"{i}. ");
+            }
+
+            await RemoveLinesThatStartWith("Please press enter to get back to the master menu or enter character name to log");
+            await RemoveLinesThatStartWith("Player name:");
+
             RemoveBattle();
             await RemoveUnreadNotes();
             RemoveDoubleBlankLines();
