@@ -1,9 +1,12 @@
-﻿using Avalon.Common.Colors;
+﻿using Argus.Extensions;
+using Avalon.Common.Colors;
 using Avalon.Common.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media;
@@ -15,8 +18,6 @@ namespace Avalon
     /// </summary>
     public partial class LogCreatorWindow : Window
     {
-        // [ (C)ontinue, (R)efresh, (B)ack, (H)elp, (E)nd, (T)op, (Q)uit, or RETURN ]:
-        // -->
 
         /// <summary>
         /// The text for the status bar.
@@ -205,30 +206,41 @@ namespace Avalon
                 {
                     case "Remove Prompts":
                         RemovePrompts();
+                        RemoveDoubleBlankLines();
                         break;
                     case "Remove Channels":
                         RemoveChannels();
+                        RemoveDoubleBlankLines();
                         break;
                     case "Remove Toasts":
                         RemoveToasts();
+                        RemoveDoubleBlankLines();
                         break;
                     case "Remove Double Blank Lines":
                         RemoveDoubleBlankLines();
                         break;
                     case "Remove Lines that Start With":
-                        RemoveLinesThatStartWith();
+                        await RemoveLinesThatStartWith("");
+                        RemoveDoubleBlankLines();
                         break;
                     case "Remove Lines that End With":
                         RemoveLinesThatEndWith();
+                        RemoveDoubleBlankLines();
                         break;
                     case "Remove Lines that Contain":
                         RemoveLinesThatContain();
+                        RemoveDoubleBlankLines();
                         break;
                     case "Remove Battle":
                         RemoveBattle();
+                        RemoveDoubleBlankLines();
                         break;
                     case "Remove Directions":
                         RemoveDirections();
+                        RemoveDoubleBlankLines();
+                        break;
+                    case "RP Log":
+                        CreateRpLog();
                         break;
                     case "Remove Maccus":
                         RemoveLinesContaining("Maccus");
@@ -287,7 +299,7 @@ namespace Avalon
         /// </summary>
         public void RemovePrompts()
         {
-            LogEditor.Text = Regex.Replace(LogEditor.Text, @"\<(\d+)/(\d+)hp (\d+)/(\d+)m (\d+)/(\d+)mv \((\d+)\|(\w+)\) \((.*?)\) \((.*?)\) (.*?) (.*?)\>", "");
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"\<(\d+)/(\d+)hp (\d+)/(\d+)m (\d+)/(\d+)mv \((\d+)\|(\w+)\) \((.*?)\) \((.*?)\) (.*?) (.*?)\>", "", RegexOptions.Multiline);
         }
 
         /// <summary>
@@ -295,19 +307,27 @@ namespace Avalon
         /// </summary>
         private void RemoveChannels()
         {
-            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?(\[ .* \] )?([\w'-]+|The ghost of [\w'-]+|\(An Imm\)|\(Imm\) [\w'-]+|\(Wizi@\d\d\) \(Imm\) [\w'-]+) (\bclan gossip(s?)\b|\bclan(s?)\b|\bgossip(s?)\b|\bask(s?)\b|\banswers(s?)\b|\btell(s?)\b|\bBloodbath(s?)\b|\bpray(s?)\b|\bgrats\b|\bauction(s?)\b|\bquest(s?)\b|\bradio(s?)\b|\bimm(s?)\b).*'$", "");
-            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?(\[ .* \] )?(?!.*OOC).*Kingdom: .*$", "");
-            LogEditor.Text = Regex.Replace(LogEditor.Text, @"\((Admin|Coder)\) \(Imm\) [\w'-]+:", "");
-            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?(\(.*\)?)?([\w'-]+|The ghost of [\w'-]+|\(An Imm\)|\(Imm\) [\w'-]+) (OOC|\[Newbie\]).*$", "");
-            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^\((Shalonesti|OOC Shalonesti|Clave|OOC Clave)\).*$", "");
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?(\[ .* \] )?([\w'-]+|The ghost of [\w'-]+|\(An Imm\)|\(Imm\) [\w'-]+|\(Wizi@\d\d\) \(Imm\) [\w'-]+) (\bclan gossip(s?)\b|\bclan(s?)\b|\bgossip(s?)\b|\bask(s?)\b|\banswers(s?)\b|\btell(s?)\b|\bBloodbath(s?)\b|\bpray(s?)\b|\bgrats\b|\bauction(s?)\b|\bquest(s?)\b|\bradio(s?)\b|\bimm(s?)\b).*'", "", RegexOptions.Multiline);
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?(\[ .* \] )?(?!.*OOC).*Kingdom: .*", "", RegexOptions.Multiline);
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"\((Admin|Coder)\) \(Imm\) [\w'-]+:", "", RegexOptions.Multiline);
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?(\(.*\)?)?([\w'-]+|The ghost of [\w'-]+|\(An Imm\)|\(Imm\) [\w'-]+) (OOC|\[Newbie\]).*", "", RegexOptions.Multiline);
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^\((Shalonesti|OOC Shalonesti|Clave|OOC Clave)\).*", "", RegexOptions.Multiline);
+        }
+
+        private async Task RemoveLinesThatStartWith()
+        {
+            await RemoveLinesThatStartWith("");
         }
 
         /// <summary>
         /// Removes all lines that start with a string pattern.
         /// </summary>
-        private async void RemoveLinesThatStartWith()
+        private async Task RemoveLinesThatStartWith(string text)
         {
-            string text = await _interp.Conveyor.InputBox("Enter text:", "Remove Lines that Start With");
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                await _interp.Conveyor.InputBox("Enter text:", "Remove Lines that Start With");
+            }
 
             if (string.IsNullOrWhiteSpace(text))
             {
@@ -329,12 +349,20 @@ namespace Avalon
             Argus.Memory.StringBuilderPool.Return(sb);
         }
 
+        private async Task RemoveLinesThatEndWith()
+        {
+            await RemoveLinesThatEndWith("");
+        }
+
         /// <summary>
         /// Removes all lines that end with a set of text.
         /// </summary>
-        private async void RemoveLinesThatEndWith()
+        private async Task RemoveLinesThatEndWith(string text)
         {
-            string text = await _interp.Conveyor.InputBox("Enter text:", "Remove Lines that End With");
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                text = await _interp.Conveyor.InputBox("Enter text:", "Remove Lines that End With");
+            }
 
             if (string.IsNullOrWhiteSpace(text))
             {
@@ -356,12 +384,20 @@ namespace Avalon
             Argus.Memory.StringBuilderPool.Return(sb);
         }
 
+        private async Task RemoveLinesThatContain()
+        {
+            await RemoveLinesThatContain("");
+        }
+
         /// <summary>
         /// Removes all lines that contains a set of text.
         /// </summary>
-        private async void RemoveLinesThatContain()
+        private async Task RemoveLinesThatContain(string text)
         {
-            string text = await _interp.Conveyor.InputBox("Enter text:", "Remove Lines that Contain");
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                text = await _interp.Conveyor.InputBox("Enter text:", "Remove Lines that Contain");
+            }
 
             if (string.IsNullOrWhiteSpace(text))
             {
@@ -434,7 +470,7 @@ namespace Avalon
             {
                 bool found = false;
 
-               // Verbatim filters
+                // Verbatim filters
                 foreach (string filter in list)
                 {
                     if (string.Equals(line, filter, StringComparison.OrdinalIgnoreCase))
@@ -462,7 +498,7 @@ namespace Avalon
         /// </summary>
         private void RemoveToasts()
         {
-            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?([\[\(](.*?)[\]\)])?[ ]{0,}([\w'-]+) got (.*?) by (.*?) ([\[\(] (.*?) [\]\)])?[ ]{0,}([\(]Arena[\)])?", "");
+            LogEditor.Text = Regex.Replace(LogEditor.Text, @"^[\a]?([\[\(](.*?)[\]\)])?[ ]{0,}([\w'-]+) got (.*?) by (.*?) ([\[\(] (.*?) [\]\)])?[ ]{0,}([\(]Arena[\)])?", "", RegexOptions.Multiline);
         }
 
         /// <summary>
@@ -596,6 +632,217 @@ namespace Avalon
             }
         }
 
+        private void RemoveSingleWordLines()
+        {
+            var sb = Argus.Memory.StringBuilderPool.Take();
+
+            try
+            {
+                foreach (string line in LogEditor.Text.Replace("\r", "").Split('\n'))
+                {
+                    if (line.ToWords().Count(x => !string.IsNullOrWhiteSpace(x)) == 1)
+                    {
+                        continue;
+                    }
+
+                    sb.AppendLine(line);
+                }
+
+                LogEditor.Text = sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                SetError($"Error: {ex.Message}");
+            }
+            finally
+            {
+                Argus.Memory.StringBuilderPool.Return(sb);
+            }
+        }
+
+        private async Task RemoveSpells()
+        {
+            await RemoveLinesThatStartWith("c ");
+            await RemoveLinesThatStartWith("cast ");
+        }
+
+        private async Task RemoveScore()
+        {
+            await RemoveLinesThatStartWith(@"Score for ");
+            await RemoveLinesThatStartWith(@"----------------------------------------------------------------------------");
+            await RemoveLinesThatStartWith(@"LEVEL: ");
+            await RemoveLinesThatStartWith(@"YEARS: ");
+            await RemoveLinesThatStartWith(@"SEX  : ");
+            await RemoveLinesThatStartWith(@"STR  : ");
+            await RemoveLinesThatStartWith(@"INT  : ");
+            await RemoveLinesThatStartWith(@"WIS  : ");
+            await RemoveLinesThatStartWith(@"DEX  : ");
+            await RemoveLinesThatStartWith(@"CON  : ");
+            await RemoveLinesThatStartWith(@"THA  :             Wimpy: ");
+            await RemoveLinesThatStartWith(@"                   Wimpy: ");
+            await RemoveLinesThatStartWith(@"BANK : ");
+            await RemoveLinesThatStartWith(@"GOLD : ");
+            await RemoveLinesThatStartWith(@"PRACT: ");
+            await RemoveLinesThatStartWith(@"TRAIN: ");
+            await RemoveLinesThatStartWith(@"XP   : ");
+            await RemoveLinesThatStartWith(@"PK Trains: ");
+            await RemoveLinesThatStartWith(@"Next PK loot change at: ");
+            await RemoveLinesThatStartWith(@"                                              256 Color");
+            await RemoveLinesThatStartWith(@"Speaking: ");
+            await RemoveLinesThatStartWith(@"Remaining Hostile Time: ");
+            await RemoveLinesThatStartWith(@"Religion: ");
+            await RemoveLinesThatStartWith(@"PKill: ");
+            await RemoveLinesThatStartWith(@"PK Points: ");
+            await RemoveLinesThatStartWith(@"You feel great.");
+            await RemoveLinesThatStartWith("You are a light sleeper.");
+            await RemoveLinesThatStartWith("You are exceptionally calm in combat.");
+            await RemoveLinesThatStartWith("You are exceptionally intelligent.");
+            await RemoveLinesThatStartWith("You have a good knowledge of weaponry.");
+            await RemoveLinesThatStartWith("You have an affinity to magic.");
+            await RemoveLinesThatStartWith("You are resistant to magic.");
+            await RemoveLinesThatStartWith("You are exceptionally agile.");
+            await RemoveLinesThatStartWith("You are large for your race.");
+            await RemoveLinesThatStartWith("You have a deep perception of beings.");
+            await RemoveLinesThatStartWith("You suffer from horrible nightmares.");
+            await RemoveLinesThatStartWith("You are completely insane.");
+            await RemoveLinesThatStartWith("You have an obsessive hatred for");
+            await RemoveLinesThatStartWith("You are deaf.");
+            await RemoveLinesThatStartWith("You are vulnerable to magic.");
+            await RemoveLinesThatStartWith("You are illiterate.");
+            await RemoveLinesThatStartWith("You lost an arm in a childhood accident.");
+            await RemoveLinesThatStartWith("You cannot speak.");
+            await RemoveLinesThatStartWith("You suffer from a nervous tic.");
+            await RemoveLinesThatStartWith("You are exceptionally weak and frail.");
+            await RemoveLinesThatStartWith(@"----------------------------------------------------------------------------");
+            await RemoveLinesThatStartWith(@"PROFESSION: Son of a God");
+            await RemoveLinesThatStartWith(@"----------------------------------------------------------------------------");
+        }
+
+        public async Task RemoveHeader()
+        {
+            await RemoveLinesThatContain("\a");
+            await RemoveLinesThatStartWith(@"[ ");
+            await RemoveLinesThatStartWith("Do you want color");
+            await RemoveLinesThatStartWith("Original DikuMUD by: Hans Staerfelt, Katja Nyboe, Tom Madsen, Michael");
+            await RemoveLinesThatStartWith("Seifert, Sebastian Hammer.");
+            await RemoveLinesThatStartWith("Original MERC 2.1 by Hatchet, Furey, and Kahn.");
+            await RemoveLinesThatStartWith("DSL Owned by Allen Games. (which is owned by Scorn)");
+            await RemoveLinesThatStartWith("DSL Web Site: http://www.dsl-mud.org");
+            await RemoveLinesThatStartWith(@"Various Snippets from SMAUG");
+            await RemoveLinesThatStartWith(@"                                   /   \");
+            await RemoveLinesThatStartWith(" _                         )      ((   ))     (");
+            await RemoveLinesThatStartWith(@"(@)                       /|\      ))_((     /|\                         _");
+            await RemoveLinesThatStartWith(@"|-|`\                    / | \    (/\|/\)   / | \                       (@)");
+            await RemoveLinesThatStartWith(@"| |---------------------/--|-voV---\`|'/--Vov-|--\----------------------|-|");
+            await RemoveLinesThatStartWith(@"|-|                          '^`   (o o)  '^`                           | |");
+            await RemoveLinesThatStartWith(@"| |                                `\Y/'                                |-|");
+            await RemoveLinesThatStartWith(@"|-|                                                                     | |");
+            await RemoveLinesThatStartWith(@"|-|                    DARK & SHATTERED LANDS (DSL)                     | |");
+            await RemoveLinesThatStartWith(@"| |                                                                     |-|");
+            await RemoveLinesThatStartWith(@"|-|                           [Implementor]                             | |");
+            await RemoveLinesThatStartWith(@"| |                               Scorn                                 |-|");
+            await RemoveLinesThatStartWith(@"|-|                        (scorn@dsl-mud.org)                          | |");
+            await RemoveLinesThatStartWith(@"|_|_____________________________________________________________________|-|");
+            await RemoveLinesThatStartWith(@"(@)                l   /\ /         ( (       \ /\   l                `\|_|");
+            await RemoveLinesThatStartWith(@"                   l /   V           \ \       V   \ l                  (@)");
+            await RemoveLinesThatStartWith(@"                   l/                _) )_          \I");
+            await RemoveLinesThatStartWith(@"                                     `\ /'                         ");
+            await RemoveLinesThatStartWith(@"                                       ,");
+            await RemoveLinesThatStartWith(@"             Code:  DSL ");
+            await RemoveLinesThatStartWith(@"           Based on ROM ");
+            await RemoveLinesThatStartWith(@"[DSL] (Push Enter to Continue)");
+            await RemoveLinesThatStartWith(@" ------===+*<==(  Dark and Shattered Lands: Main Login Menu )==>*+===------");
+            await RemoveLinesThatStartWith(@"    (C)reate a New Character");
+            await RemoveLinesThatStartWith(@"    (L)imited Race Creation");
+            await RemoveLinesThatStartWith(@"    (P)lay Existing Character");
+            await RemoveLinesThatStartWith(@"    (M)aster Account Login     ");
+            await RemoveLinesThatStartWith(@"    (F)orm a New Master Account");
+            await RemoveLinesThatStartWith(@"    (W)ho is on now?");
+            await RemoveLinesThatStartWith(@"    (H)elpfiles");
+            await RemoveLinesThatStartWith(@"    (Q)uit");
+            await RemoveLinesThatStartWith(@"    Your selection? ->");
+            await RemoveLinesThatStartWith(@"(Existing Master Account)");
+            await RemoveLinesThatStartWith(@"What is your Master Account's name?");
+            await RemoveLinesThatStartWith(@"Password:");
+            await RemoveLinesThatStartWith(@" ------===+*<==(  Dark and Shattered Lands: Master Login Menu )==>*+===------");
+            await RemoveLinesThatStartWith(@"Master account:");
+            await RemoveLinesThatStartWith(@"    (C)reate a New Character");
+            await RemoveLinesThatStartWith(@"    (V)iew Characters and Personal information");
+            await RemoveLinesThatStartWith(@"    (M)aster Account Password Change");
+            await RemoveLinesThatStartWith(@"    (E)mail and Personal Information Change");
+            await RemoveLinesThatStartWith(@"    (A)dd existing Character to Master  System Time");
+            await RemoveLinesThatStartWith(@"    (R)ewards menu");
+            await RemoveLinesThatStartWith(@"    (Q)uit to Main Menu");
+            await RemoveLinesThatStartWith(@" ------===+*<==(  Dark and Shattered Lands: Master Character Logon )==>*+===------");
+            await RemoveLinesThatStartWith(@"   You can only log on a character attached to this master account.");
+            await RemoveLinesThatStartWith(@"   To see that list hit enter then from the main menu hit: ");
+            await RemoveLinesThatStartWith(@"   (V) to View Characters and Personal information.");
+            await RemoveLinesThatStartWith(@"Player name:");
+            await RemoveLinesThatStartWith(@"*");
+            await RemoveLinesThatStartWith("WELCOME TO DARK & SHATTERED LANDS");
+            await RemoveLinesThatStartWith("-");
+            await RemoveLinesThatStartWith("When approaching a Red Dragon, be sure to bring your wand of marshmallow.");
+            await RemoveLinesThatStartWith(@"Welcome to DSL! DSL Loves You! Other muds think you are ugly, they said so!  ");
+
+            await RemoveLinesThatStartWith(@"whoami");
+            await RemoveLinesThatStartWith(@"score");
+            await RemoveLinesThatStartWith(@"prompt ");
+            await RemoveLinesThatStartWith(@"score");
+            await RemoveLinesThatStartWith(@"You are currently improving ");
+            await RemoveLinesThatStartWith(@"Syntax: improve <skillname> / improve none");
+
+        }
+
+        private async Task RemoveUnreadNotes()
+        {
+            await RemoveLinesThatContain("new news article waiting.");
+            await RemoveLinesThatContain("changes waiting to be read.");
+            await RemoveLinesThatContain("change waiting to be read.");
+            await RemoveLinesThatContain("new ooc note waiting");
+            await RemoveLinesThatContain("new ooc notes waiting");
+            await RemoveLinesThatContain("new notes waiting.");
+            await RemoveLinesThatContain("new note waiting.");
+            await RemoveLinesThatContain("new quest note waiting");
+            await RemoveLinesThatContain("new quest notes waiting");
+            await RemoveLinesThatContain("unread auctions.");
+            await RemoveLinesThatContain("unread auction.");
+            await RemoveLinesThatContain("story notes have been added.");
+            await RemoveLinesThatContain("story note have been added.");
+            await RemoveLinesThatContain("bloodbath notes have been added.");
+            await RemoveLinesThatContain("bloodbath note have been added.");
+        }
+
+        private async Task CreateRpLog()
+        {
+            RemoveSingleWordLines();
+            RemoveToasts();
+            RemovePrompts();
+            await RemoveHeader();
+            await RemoveLinesThatStartWith(@"-->");
+            await RemoveLinesThatStartWith(@"[ (C)ontinue, (R)efresh, (B)ack, (H)elp, (E)nd, (T)op, (Q)uit, or RETURN ]");
+            await RemoveLinesThatStartWith("[Hit Return to continue]");
+            await RemoveLinesThatStartWith("You have become better at");
+            await RemoveLinesThatStartWith("You are logged in as:");
+            await RemoveLinesThatContain("practice sessions left.");
+            await RemoveLinesThatContain("You focus your training on");
+            await RemoveSpells();
+            await RemoveScore();
+            await RemoveLinesThatStartWith("<");
+            await RemoveLinesThatStartWith("You are using:");
+            await RemoveLinesThatStartWith("You are affected by the following spells:");
+            await RemoveLinesThatContain(" : modifies");
+            await RemoveLinesThatStartWith("You aren't currently on a quest.");
+            await RemoveLinesThatStartWith("There is less than a hour remaining until you can go on another quest.");
+            RemoveBattle();
+            await RemoveUnreadNotes();
+            RemoveDoubleBlankLines();
+        }
+
+        /// <summary>
+        /// TODO
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void FindAndReplace(object sender, RoutedEventArgs e)
         {
         }
