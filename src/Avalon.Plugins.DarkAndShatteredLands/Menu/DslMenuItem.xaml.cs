@@ -217,9 +217,8 @@ namespace Avalon.Plugins.DarkAndShatteredLands
                 return;
             }
 
-            var win = new LogCreatorWindow(interp);
+            var win = new LogCreatorWindow(interp, interp.Conveyor.GetSelectedText(Common.Models.TerminalTarget.Main, true));
             win.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
-            win.Text = interp.Conveyor.GetSelectedText(Common.Models.TerminalTarget.Main, true);
             win.Show();
         }
 

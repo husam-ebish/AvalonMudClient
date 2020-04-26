@@ -27,7 +27,7 @@
             x:Name="LogEditor" ShowLineNumbers="True" WordWrap="False"
             FontFamily="Consolas" FontSize="12pt" IsReadOnly="False"
             HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible"
-            Padding="0,0,0,0" Margin="1,0,0,0" 
+            Padding="0,0,0,0" Margin="1,0,0,0" KeyDown="LogEditor_KeyDown"
             Background="Black" Foreground="#DCDCDC"
             ScrollViewer.PanningMode="VerticalOnly"            
             BorderBrush="White">
