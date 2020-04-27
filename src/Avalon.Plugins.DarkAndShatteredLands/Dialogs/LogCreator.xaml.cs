@@ -241,7 +241,6 @@ namespace Avalon
                         RemoveToasts();
                         break;
                     case "Remove Double Blank Lines":
-                        this.LineManager.RemoveDoubleBlankLines();
                         break;
                     case "Remove Lines that Start With":
                         this.LineManager.RemoveLineIfStartsWith(argOne, StringComparison.OrdinalIgnoreCase);
@@ -254,6 +253,12 @@ namespace Avalon
                         break;
                     case "Remove Battle":
                         RemoveBattle();
+                        break;
+                    case "Remove Score":
+                        RemoveScore();
+                        break;
+                    case "Remove Spell Cast Commands":
+                        RemoveSpells();
                         break;
                     case "Remove Directions":
                         RemoveDirections();
@@ -269,6 +274,7 @@ namespace Avalon
                         return;
                 }
 
+                this.LineManager.RemoveDoubleBlankLines();
                 this.LogEditor.Text = this.LineManager.ToString();
             }
             catch (Exception ex)
@@ -306,25 +312,6 @@ namespace Avalon
 
             this.LineManager.RemoveLineIfRegexMatches(list);
         }
-
-        ///// <summary>
-        ///// Removes two blank lines in a row and replaces them with one.
-        ///// </summary>
-        //private void RemoveDoubleBlankLines()
-        //{
-        //    this.LineManager.Replace("\r\n", "\n");
-        //    text = text.Replace("\r\n", "\n");
-        //    bool containsPattern = text.Contains("\n\n\n");
-
-        //    while (containsPattern)
-        //    {
-        //        text = text.Replace("\n\n\n", "\n\n");
-        //        containsPattern = text.Contains("\n\n\n");
-        //    }
-
-        //    text = text.Replace("\n", "\r\n");
-        //    LogEditor.Text = text;
-        //}
 
         private void RemoveDirections()
         {

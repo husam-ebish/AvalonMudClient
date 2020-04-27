@@ -34,7 +34,7 @@
         </avalonedit:TextEditor>
 
         <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
-            <Label Foreground="White" Margin="5,5,0,5">Remove Lines</Label>
+            <Label Foreground="White" Margin="5,5,0,5">Remove Lines by Pattern</Label>
             <ui:DropDownButton AutomationProperties.Name="Remove Line Options" ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">
                 <ui:DropDownButton.Content>
                     <StackPanel Orientation="Horizontal">
@@ -44,15 +44,10 @@
                 </ui:DropDownButton.Content>
                 <ui:DropDownButton.Flyout>
                     <ui:MenuFlyout Placement="BottomEdgeAlignedLeft">
-                        <MenuItem Header="Remove Prompts" Tag="Remove Prompts" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
-                        <MenuItem Header="Remove Battle" Tag="Remove Battle" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
-                        <MenuItem Header="Remove Toasts" Tag="Remove Toasts" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                         <MenuItem Header="Remove Double Blank Lines" Tag="Remove Double Blank Lines" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
-                        <MenuItem Header="Remove Directions" Tag="Remove Directions" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                         <MenuItem Header="Remove Lines that Start With" Tag="Remove Lines that Start With" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                         <MenuItem Header="Remove Lines that End With" Tag="Remove Lines that End With" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                         <MenuItem Header="Remove Lines that Contain" Tag="Remove Lines that Contain" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
-                        <MenuItem Header="Remove Lines by Regex" Tag="Remove Lines by Regex" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                         <MenuItem Header="Remove Lines by Regex" Tag="Remove Lines by Regex" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                     </ui:MenuFlyout>
                 </ui:DropDownButton.Flyout>
@@ -70,6 +65,28 @@
                 <ui:DropDownButton.Flyout>
                     <ui:MenuFlyout Placement="BottomEdgeAlignedLeft">
                         <MenuItem Header="Find and Replace" Tag="Find and Replace" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
+                    </ui:MenuFlyout>
+                </ui:DropDownButton.Flyout>
+            </ui:DropDownButton>
+
+            <Label Foreground="White" Margin="5,5,0,5">Remove DSL Game Sections</Label>
+
+            <ui:DropDownButton AutomationProperties.Name="Remove Line Options" ui:ControlHelper.CornerRadius="0" HorizontalAlignment="Stretch" BorderBrush="#1E1E1E" BorderThickness="0,0,0,1">
+                <ui:DropDownButton.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <ui:FontIcon Glyph="&#xECC9;" />
+                        <Label Margin="7,0,0,0">Remove Line Options</Label>
+                    </StackPanel>
+                </ui:DropDownButton.Content>
+                <ui:DropDownButton.Flyout>
+                    <ui:MenuFlyout Placement="BottomEdgeAlignedLeft">
+                        <MenuItem Header="Remove Prompts" Tag="Remove Prompts" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
+                        <MenuItem Header="Remove Channels" Tag="Remove Channels" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
+                        <MenuItem Header="Remove Battle" Tag="Remove Battle" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
+                        <MenuItem Header="Remove Toasts" Tag="Remove Toasts" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
+                        <MenuItem Header="Remove Score" Tag="Remove Score" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
+                        <MenuItem Header="Remove Directions" Tag="Remove Directions" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
+                        <MenuItem Header="Remove Spell Cast Commands" Tag="Remove Spell Cast Commands" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                     </ui:MenuFlyout>
                 </ui:DropDownButton.Flyout>
             </ui:DropDownButton>

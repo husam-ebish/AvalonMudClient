@@ -11,20 +11,21 @@ namespace Argus.Data
     /// A class to manage a list of lines who require operations to be performed on those lines.  The lines are kept interally
     /// and removed or updated.  When ToString or ToStringBuilder are called the outputted text is rebuilt from
     /// what is left in the Lines list.  The lines are parsed when initially passed in and stored in the <see cref="Lines"/>
-    /// property against which all operations will occur.
+    /// property against which all operations will occur.  Transforms that need to occur against the full string will force
+    /// the full string to be realized.
     /// </summary>
     /// <remarks>
-    /// It is important to note that this deals with use cases where operations are dealt against individual lines and multiline
-    /// operations are mostly not supported.
+    /// I don't know that I'm in love with this class.  It feels overly complicated and inefficient but it works for
+    /// now to accomplish string updates I need sooner than later.
     /// </remarks>
     public class StringTransformer
     {
         //*********************************************************************************************************************
         //
-        //             Class:  LineManager
+        //             Class:  StringTransformer
         //      Organization:  http://www.blakepell.com
-        //      Initial Date:  04/26/2020
-        //      Last Updated:  06/26/2020
+        //      Initial Date:  04/25/2020
+        //      Last Updated:  06/27/2020
         //     Programmer(s):  Blake Pell, blakepell@hotmail.com
         //
         //*********************************************************************************************************************
@@ -39,6 +40,10 @@ namespace Argus.Data
         /// </summary>
         public List<string> Lines { get; set; } = new List<string>();
 
+        /// <summary>
+        /// Returns the number of lines currently in the Lines list.
+        /// </summary>
+        public int LineCount { get => this.Lines.Count; }
 
         /// <summary>
         /// Constructor
@@ -450,7 +455,7 @@ namespace Argus.Data
         /// <param name="pattern"></param>
         /// <param name="replaceWith"></param>
         public void ReplaceRegexPerLine(string pattern, string replaceWith)
-        {            
+        {
             for (int i = 0; i < this.Lines.Count - 1; i++)
             {
                 this.Lines[i] = Regex.Replace(this.Lines[i], pattern, replaceWith);
