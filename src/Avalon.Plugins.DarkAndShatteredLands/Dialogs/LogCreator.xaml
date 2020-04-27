@@ -49,6 +49,7 @@
                         <MenuItem Header="Remove Lines that End With" Tag="Remove Lines that End With" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                         <MenuItem Header="Remove Lines that Contain" Tag="Remove Lines that Contain" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                         <MenuItem Header="Remove Lines by Regex" Tag="Remove Lines by Regex" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
+                        <MenuItem Header="Remove Single Word Lines" Tag="Remove Single Word Lines" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                     </ui:MenuFlyout>
                 </ui:DropDownButton.Flyout>
             </ui:DropDownButton>
@@ -75,16 +76,19 @@
                 <ui:DropDownButton.Content>
                     <StackPanel Orientation="Horizontal">
                         <ui:FontIcon Glyph="&#xECC9;" />
-                        <Label Margin="7,0,0,0">Remove Line Options</Label>
+                        <Label Margin="7,0,0,0">DSL Sections</Label>
                     </StackPanel>
                 </ui:DropDownButton.Content>
                 <ui:DropDownButton.Flyout>
                     <ui:MenuFlyout Placement="BottomEdgeAlignedLeft">
                         <MenuItem Header="Remove Prompts" Tag="Remove Prompts" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                         <MenuItem Header="Remove Channels" Tag="Remove Channels" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
+                        <MenuItem Header="Remove Notes" Tag="Remove Notes" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                         <MenuItem Header="Remove Battle" Tag="Remove Battle" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                         <MenuItem Header="Remove Toasts" Tag="Remove Toasts" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
+                        <MenuItem Header="Remove Affects" Tag="Remove Affects" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                         <MenuItem Header="Remove Score" Tag="Remove Score" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
+                        <MenuItem Header="Remove Clan Info" Tag="Remove Clan Info" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                         <MenuItem Header="Remove Directions" Tag="Remove Directions" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                         <MenuItem Header="Remove Spell Cast Commands" Tag="Remove Spell Cast Commands" Click="ButtonHandler_Click" HorizontalAlignment="Stretch" />
                     </ui:MenuFlyout>

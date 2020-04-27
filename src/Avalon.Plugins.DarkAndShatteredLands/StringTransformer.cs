@@ -445,7 +445,7 @@ namespace Argus.Data
         public void ReplaceRegex(string pattern, string replaceWith)
         {
             BuildString();
-            string temp = Regex.Replace(_sb.ToString(), pattern, replaceWith);
+            string temp = Regex.Replace(_sb.ToString(), pattern, replaceWith, RegexOptions.Singleline);
             BuildLines(temp);
         }
 
