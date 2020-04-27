@@ -34,7 +34,12 @@
             <MenuItem Header="Clear Terminal" Click="AvalonTerminalContextMenuClear_OnClick"></MenuItem>
         </ContextMenu>
     </Window.Resources>
-
+    <Window.CommandBindings>
+        <CommandBinding Command="local:MainWindow.LoadPlugin" Executed="MenuItemManuallyLoadPlugin_Click" />
+    </Window.CommandBindings>
+    <Window.InputBindings>
+        <KeyBinding Command="local:MainWindow.LoadPlugin" Key="P" Modifiers="Ctrl+Alt" />
+    </Window.InputBindings>
     <Grid>
         <controls:TabControlEx x:Name="TabMain" SelectionChanged="TabControl_SelectionChanged">
             <TabControl.Resources>
@@ -125,7 +130,7 @@
                                 <MenuItem.Icon>
                                     <ui:FontIcon Glyph="&#xEC7A;" />
                                 </MenuItem.Icon>
-                                <MenuItem Header="Manually Load Plugin" Click="MenuItemManuallyLoadPlugin_Click">
+                                <MenuItem Header="Manually Load Plugin" Click="MenuItemManuallyLoadPlugin_Click" InputGestureText="Ctrl+Alt+P">
                                 </MenuItem>
                             </MenuItem>
                             <MenuItem Header="Send _Text to Game" Click="MenuItemSendTextToGameAsync_Click">

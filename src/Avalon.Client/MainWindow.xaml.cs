@@ -18,6 +18,7 @@ using Avalon.Common.Plugins;
 using ModernWpf.Controls;
 using System.Diagnostics;
 using System.Windows.Media;
+using System.Windows.Input;
 
 namespace Avalon
 {
@@ -1195,13 +1196,18 @@ namespace Avalon
         }
 
         /// <summary>
+        /// For handling executing the load plugin menu option via a hot-key.
+        /// </summary>
+        public static readonly RoutedUICommand LoadPlugin = new RoutedUICommand("LoadPlugin", "LoadPlugin", typeof(MainWindow));
+
+        /// <summary>
         /// Manually activate plugins for a specified IP address.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private async void MenuItemManuallyLoadPlugin_Click(object sender, RoutedEventArgs e)
         {
-            string ipAddress = await this.Interp.Conveyor.InputBox("What is the IP Address associated with the plugin you want to load?", "Load Plugin");
+            string ipAddress = await this.Interp.Conveyor.InputBox("What is the IP Address associated with the plugin you want to load?", "Load Plugin", App.Settings.ProfileSettings.IpAddress);
 
             if (string.IsNullOrWhiteSpace(ipAddress))
             {
@@ -1210,5 +1216,6 @@ namespace Avalon
 
             ActivatePlugins(ipAddress);
         }
+
     }
 }
