@@ -217,7 +217,15 @@ namespace Avalon.Plugins.DarkAndShatteredLands
                 return;
             }
 
-            var win = new LogCreatorWindow(interp, interp.Conveyor.GetSelectedText(Common.Models.TerminalTarget.Main, true));
+            string text = interp.Conveyor.GetSelectedText(Common.Models.TerminalTarget.Main, true);
+
+            // If the selection was null, get all the text in the main window.
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                text = interp.Conveyor.GetText(Common.Models.TerminalTarget.Main, true);
+            }
+
+            var win = new LogCreatorWindow(interp, text);
             win.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             win.Show();
         }
