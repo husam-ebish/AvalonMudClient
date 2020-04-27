@@ -17,7 +17,7 @@ namespace Argus.Data
     /// It is important to note that this deals with use cases where operations are dealt against individual lines and multiline
     /// operations are mostly not supported.
     /// </remarks>
-    public class LineManager
+    public class StringTransformer
     {
         //*********************************************************************************************************************
         //
@@ -29,9 +29,54 @@ namespace Argus.Data
         //
         //*********************************************************************************************************************
 
-        public LineManager(string text)
+        /// <summary>
+        /// A single internal StringBuilder used to process and return the output.
+        /// </summary>
+        private StringBuilder _sb = new StringBuilder();
+
+        /// <summary>
+        /// The list of individual lines that we will filter down.
+        /// </summary>
+        public List<string> Lines { get; set; } = new List<string>();
+
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="text"></param>
+        public StringTransformer(string text)
+        {
+            BuildLines(text);
+        }
+
+        /// <summary>
+        /// Builds the lines from the stored <see cref="StringBuilder" />.
+        /// </summary>
+        private void BuildLines()
+        {
+            this.Lines = _sb.ToString().Replace("\r", "").Split('\n').ToList();
+        }
+
+        /// <summary>
+        /// Builds the lines from the provided text.
+        /// </summary>
+        /// <param name="text"></param>
+        private void BuildLines(string text)
         {
             this.Lines = text.Replace("\r", "").Split('\n').ToList();
+        }
+
+        /// <summary>
+        /// Builds the <see cref="StringBuilder"/> from the contents of <see cref="Lines"/>.
+        /// </summary>
+        private void BuildString()
+        {
+            _sb.Clear();
+
+            foreach (string line in this.Lines)
+            {
+                _sb.AppendLine(line);
+            }
         }
 
         /// <summary>
@@ -39,7 +84,7 @@ namespace Argus.Data
         /// </summary>
         /// <param name="pattern"></param>
         /// <param name="compareType"></param>
-        public void RemoveIfStartsWith(string pattern, StringComparison compareType = StringComparison.Ordinal)
+        public void RemoveLineIfStartsWith(string pattern, StringComparison compareType = StringComparison.Ordinal)
         {
             for (int i = this.Lines.Count - 1; i >= 0; i--)
             {
@@ -55,7 +100,7 @@ namespace Argus.Data
         /// </summary>
         /// <param name="patterns"></param>
         /// <param name="compareType"></param>
-        public void RemoveIfStartsWith(string[] patterns, StringComparison compareType = StringComparison.Ordinal)
+        public void RemoveLineIfStartsWith(string[] patterns, StringComparison compareType = StringComparison.Ordinal)
         {
             for (int i = this.Lines.Count - 1; i >= 0; i--)
             {
@@ -76,7 +121,7 @@ namespace Argus.Data
         /// </summary>
         /// <param name="pattern"></param>
         /// <param name="compareType"></param>
-        public void RemoveIfEndsWith(string pattern, StringComparison compareType = StringComparison.Ordinal)
+        public void RemoveLineIfEndsWith(string pattern, StringComparison compareType = StringComparison.Ordinal)
         {
             for (int i = this.Lines.Count - 1; i >= 0; i--)
             {
@@ -92,7 +137,7 @@ namespace Argus.Data
         /// </summary>
         /// <param name="patterns"></param>
         /// <param name="compareType"></param>
-        public void RemoveIfEndsWith(string[] patterns, StringComparison compareType = StringComparison.Ordinal)
+        public void RemoveLineIfEndsWith(string[] patterns, StringComparison compareType = StringComparison.Ordinal)
         {
             for (int i = this.Lines.Count - 1; i >= 0; i--)
             {
@@ -113,7 +158,7 @@ namespace Argus.Data
         /// </summary>
         /// <param name="pattern"></param>
         /// <param name="compareType"></param>
-        public void RemoveIfContains(string pattern, StringComparison compareType = StringComparison.Ordinal)
+        public void RemoveLineIfContains(string pattern, StringComparison compareType = StringComparison.Ordinal)
         {
             for (int i = this.Lines.Count - 1; i >= 0; i--)
             {
@@ -130,7 +175,7 @@ namespace Argus.Data
         /// </summary>
         /// <param name="patterns"></param>
         /// <param name="compareType"></param>
-        public void RemoveIfContains(string[] patterns, StringComparison compareType = StringComparison.Ordinal)
+        public void RemoveLineIfContains(string[] patterns, StringComparison compareType = StringComparison.Ordinal)
         {
             for (int i = this.Lines.Count - 1; i >= 0; i--)
             {
@@ -151,7 +196,7 @@ namespace Argus.Data
         /// </summary>
         /// <param name="pattern"></param>
         /// <param name="compareType"></param>
-        public void RemoveIfEquals(string pattern, StringComparison compareType = StringComparison.Ordinal)
+        public void RemoveLineIfEquals(string pattern, StringComparison compareType = StringComparison.Ordinal)
         {
             for (int i = this.Lines.Count - 1; i >= 0; i--)
             {
@@ -167,7 +212,7 @@ namespace Argus.Data
         /// </summary>
         /// <param name="patterns"></param>
         /// <param name="compareType"></param>
-        public void RemoveIfEquals(string[] patterns, StringComparison compareType = StringComparison.Ordinal)
+        public void RemoveLineIfEquals(string[] patterns, StringComparison compareType = StringComparison.Ordinal)
         {
             for (int i = this.Lines.Count - 1; i >= 0; i--)
             {
@@ -188,7 +233,7 @@ namespace Argus.Data
         /// </summary>
         /// <param name="pattern"></param>
         /// <param name="options">Regular Expression Options: Default is SingleLine only.</param>
-        public void RemoveIfRegex(string pattern, RegexOptions options = RegexOptions.Singleline)
+        public void RemoveLineIfRegexMatches(string pattern, RegexOptions options = RegexOptions.Singleline)
         {
             for (int i = this.Lines.Count - 1; i >= 0; i--)
             {
@@ -204,7 +249,7 @@ namespace Argus.Data
         /// </summary>
         /// <param name="patterns"></param>
         /// <param name="options">Regular Expression Options: Default is SingleLine only.</param>
-        public void RemoveIfRegex(string[] patterns, RegexOptions options = RegexOptions.Singleline)
+        public void RemoveLineIfRegexMatches(string[] patterns, RegexOptions options = RegexOptions.Singleline)
         {
             for (int i = this.Lines.Count - 1; i >= 0; i--)
             {
@@ -236,7 +281,7 @@ namespace Argus.Data
         /// <summary>
         /// Removes a line if it is null or whitespace.
         /// </summary>
-        public void RemoveIfIsNullOrEmpty()
+        public void RemoveLineIfIsNullOrEmpty()
         {
             for (int i = this.Lines.Count - 1; i >= 0; i--)
             {
@@ -251,7 +296,7 @@ namespace Argus.Data
         /// Removes a line if its word count exceeds the specified value.
         /// </summary>
         /// <param name="words"></param>
-        public void RemoveIfWordCountEquals(int words)
+        public void RemoveLineIfWordCountEquals(int words)
         {
             for (int i = this.Lines.Count - 1; i >= 0; i--)
             {
@@ -266,7 +311,7 @@ namespace Argus.Data
         /// Removes a line if its word count exceeds the specified value.
         /// </summary>
         /// <param name="words"></param>
-        public void RemoveIfWordCountGreaterThan(int words)
+        public void RemoveLineIfWordCountGreaterThan(int words)
         {
             for (int i = this.Lines.Count - 1; i >= 0; i--)
             {
@@ -281,7 +326,7 @@ namespace Argus.Data
         /// Removes a line if its word count is less than the specified value.
         /// </summary>
         /// <param name="words"></param>
-        public void RemoveIfWordCountLessThan(int words)
+        public void RemoveLineIfWordCountLessThan(int words)
         {
             for (int i = this.Lines.Count - 1; i >= 0; i--)
             {
@@ -300,17 +345,79 @@ namespace Argus.Data
             this.Lines = (List<string>)this.Lines.Distinct();
         }
 
+        ///// <summary>
+        ///// Removes two blank lines in a row and replaces them with one.
+        ///// </summary>
+        //private void RemoveDoubleBlankLines()
+        //{
+        //    string text = LogEditor.Text;
+        //    text = text.Replace("\r\n", "\n");
+        //    bool containsPattern = text.Contains("\n\n\n");
+
+        //    while (containsPattern)
+        //    {
+        //        text = text.Replace("\n\n\n", "\n\n");
+        //        containsPattern = text.Contains("\n\n\n");
+        //    }
+
+        //    text = text.Replace("\n", "\r\n");
+        //    LogEditor.Text = text;
+        //}
+
         /// <summary>
-        /// Replaces all occurances of a string with another string in the <see cref="Lines"/> list.
+        /// Removes two blank lines in a row and replaces them with one.
+        /// </summary>
+        public void RemoveDoubleBlankLines()
+        {
+            // Get rid of lines with only white space.
+            for (int i = this.Lines.Count - 1; i >= 0; i--)
+            {
+                bool onlySpace = true;
+                for (int c = 0; c < this.Lines[i].Length; c++)
+                {
+                    if (!char.IsWhiteSpace(this.Lines[i][c]))
+                    {
+                        onlySpace = false;
+                        break;
+                    }
+                }
+
+                if (onlySpace)
+                {
+                    this.Lines[i] = "";
+                }
+            }
+
+            BuildString();
+
+            string text = _sb.ToString();
+            text = text.Replace("\r\n", "\n");
+            bool containsPattern = text.Contains("\n\n\n");
+
+            while (containsPattern)
+            {
+                text = text.Replace("\n\n\n", "\n\n");
+                containsPattern = text.Contains("\n\n\n");
+            }
+
+            text = text.Replace("\n", "\r\n");
+
+            _sb.Clear();
+            _sb.Append(text);
+
+            BuildLines();
+        }
+
+        /// <summary>
+        /// Replaces all occurances of a string with another string in the <see cref="Lines"/>.
         /// </summary>
         /// <param name="pattern"></param>
         /// <param name="replaceWith"></param>
         public void Replace(string pattern, string replaceWith)
         {
-            for (int i = 0; i < this.Lines.Count - 1; i++)
-            {
-                this.Lines[i] = this.Lines[i].Replace(pattern, replaceWith);
-            }
+            BuildString();
+            _sb.Replace(pattern, replaceWith);
+            BuildLines();
         }
 
         /// <summary>
@@ -320,19 +427,30 @@ namespace Argus.Data
         /// <param name="replaceWith"></param>
         public void Replace(char c, char replaceWith)
         {
-            for (int i = 0; i < this.Lines.Count - 1; i++)
-            {
-                this.Lines[i] = this.Lines[i].Replace(c, replaceWith);
-            }
+            BuildString();
+            _sb.Replace(c, replaceWith);
+            BuildLines();
         }
 
         /// <summary>
-        /// Replaces a regular expression match with the provided string.
+        /// Replaces a regular expression match with the provided string run against each line.
         /// </summary>
         /// <param name="pattern"></param>
         /// <param name="replaceWith"></param>
         public void ReplaceRegex(string pattern, string replaceWith)
         {
+            BuildString();
+            string temp = Regex.Replace(_sb.ToString(), pattern, replaceWith);
+            BuildLines(temp);
+        }
+
+        /// <summary>
+        /// Replaces a regular expression match with the provided string run against each line.
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <param name="replaceWith"></param>
+        public void ReplaceRegexPerLine(string pattern, string replaceWith)
+        {            
             for (int i = 0; i < this.Lines.Count - 1; i++)
             {
                 this.Lines[i] = Regex.Replace(this.Lines[i], pattern, replaceWith);
@@ -343,7 +461,7 @@ namespace Argus.Data
         /// Appends the provided text to each line.
         /// </summary>
         /// <param name="text"></param>
-        public void Append(string text)
+        public void AppendToLine(string text)
         {
             for (int i = 0; i < this.Lines.Count - 1; i++)
             {
@@ -355,7 +473,7 @@ namespace Argus.Data
         /// Prepends the provided text to each line.
         /// </summary>
         /// <param name="text"></param>
-        public void Prepend(string text)
+        public void PrependToLine(string text)
         {
             for (int i = 0; i < this.Lines.Count - 1; i++)
             {
@@ -368,24 +486,11 @@ namespace Argus.Data
         /// </summary>
         /// <param name="before"></param>
         /// <param name="after"></param>
-        public void Wrap(string before, string after)
+        public void WrapLine(string before, string after)
         {
             for (int i = 0; i < this.Lines.Count - 1; i++)
             {
                 this.Lines[i] = $"{before}{this.Lines[i]}{after}";
-            }
-        }
-
-        /// <summary>
-        /// Builds the <see cref="StringBuilder"/> from the contents of <see cref="Lines"/>.
-        /// </summary>
-        private void BuildOutput()
-        {
-            _sb.Clear();
-
-            foreach (string line in this.Lines)
-            {
-                _sb.AppendLine(line);
             }
         }
 
@@ -429,7 +534,7 @@ namespace Argus.Data
         /// </summary>
         public override string ToString()
         {
-            this.BuildOutput();
+            this.BuildString();
             return _sb.ToString();
         }
 
@@ -438,19 +543,9 @@ namespace Argus.Data
         /// </summary>
         public StringBuilder ToStringBuilder()
         {
-            this.BuildOutput();
+            this.BuildString();
             return _sb;
         }
-
-        /// <summary>
-        /// A single internal StringBuilder used to process and return the output.
-        /// </summary>
-        private StringBuilder _sb = new StringBuilder();
-
-        /// <summary>
-        /// The list of individual lines that we will filter down.
-        /// </summary>
-        public List<string> Lines { get; set; } = new List<string>();
 
     }
 }

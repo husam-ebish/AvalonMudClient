@@ -29,7 +29,7 @@ namespace Avalon
             set => TextBlockStatus.Text = value;
         }
 
-        private LineManager LineManager { get; set; }
+        private StringTransformer LineManager { get; set; }
 
         /// <summary>
         /// The text in the log editor.
@@ -76,8 +76,8 @@ namespace Avalon
             // Set the font from the client settings.
             this.LogEditor.FontSize = _interp.Conveyor.ClientSettings.TerminalFontSize;
 
-            LineManager = new LineManager(text);
-            LineManager.RemoveIfContains("Password", StringComparison.CurrentCultureIgnoreCase);
+            LineManager = new StringTransformer(text);
+            LineManager.RemoveLineIfContains("Password", StringComparison.CurrentCultureIgnoreCase);
             LineManager.Replace("\a", "");
             LogEditor.Text = LineManager.ToString();
         }
@@ -204,7 +204,7 @@ namespace Avalon
                 _keyPressed = false;
                 LineManager.Lines.Clear();
                 LineManager = null;
-                LineManager = new LineManager(LogEditor.Text);
+                LineManager = new StringTransformer(LogEditor.Text);
             }
 
             // Get any parameters from the user that are needed.
@@ -241,15 +241,16 @@ namespace Avalon
                         RemoveToasts();
                         break;
                     case "Remove Double Blank Lines":
+                        this.LineManager.RemoveDoubleBlankLines();
                         break;
                     case "Remove Lines that Start With":
-                        this.LineManager.RemoveIfStartsWith(argOne, StringComparison.OrdinalIgnoreCase);
+                        this.LineManager.RemoveLineIfStartsWith(argOne, StringComparison.OrdinalIgnoreCase);
                         break;
                     case "Remove Lines that End With":
-                        this.LineManager.RemoveIfEndsWith(argOne, StringComparison.OrdinalIgnoreCase);
+                        this.LineManager.RemoveLineIfEndsWith(argOne, StringComparison.OrdinalIgnoreCase);
                         break;
                     case "Remove Lines that Contain":
-                        this.LineManager.RemoveIfContains(argOne, StringComparison.OrdinalIgnoreCase);
+                        this.LineManager.RemoveLineIfContains(argOne, StringComparison.OrdinalIgnoreCase);
                         break;
                     case "Remove Battle":
                         RemoveBattle();
@@ -261,7 +262,7 @@ namespace Avalon
                         CreateRpLog();
                         break;
                     case "Remove Maccus":
-                        this.LineManager.RemoveIfContains("Maccus");
+                        this.LineManager.RemoveLineIfContains("Maccus");
                         break;
                     default:
                         SetError($"Status: {desc} was not found.");
@@ -285,7 +286,7 @@ namespace Avalon
         /// </summary>
         public void RemovePrompts()
         {
-            this.LineManager.RemoveIfRegex(@"\<(\d+)/(\d+)hp (\d+)/(\d+)m (\d+)/(\d+)mv \((\d+)\|(\w+)\) \((.*?)\) \((.*?)\) (.*?) (.*?)\>");
+            this.LineManager.RemoveLineIfRegexMatches(@"\<(\d+)/(\d+)hp (\d+)/(\d+)m (\d+)/(\d+)mv \((\d+)\|(\w+)\) \((.*?)\) \((.*?)\) (.*?) (.*?)\>");
         }
 
         /// <summary>
@@ -303,7 +304,7 @@ namespace Avalon
 
             };
 
-            this.LineManager.RemoveIfRegex(list);
+            this.LineManager.RemoveLineIfRegexMatches(list);
         }
 
         ///// <summary>
@@ -311,7 +312,7 @@ namespace Avalon
         ///// </summary>
         //private void RemoveDoubleBlankLines()
         //{
-        //    string text = LogEditor.Text;
+        //    this.LineManager.Replace("\r\n", "\n");
         //    text = text.Replace("\r\n", "\n");
         //    bool containsPattern = text.Contains("\n\n\n");
 
@@ -352,7 +353,7 @@ namespace Avalon
                 "Alas, you cannot go that way."
             };
 
-            this.LineManager.RemoveIfEquals(list, StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfEquals(list, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -360,7 +361,7 @@ namespace Avalon
         /// </summary>
         private void RemoveToasts()
         {
-            this.LineManager.RemoveIfRegex(@"^[\a]?([\[\(](.*?)[\]\)])?[ ]{0,}([\w'-]+) got (.*?) by (.*?) ([\[\(] (.*?) [\]\)])?[ ]{0,}([\(]Arena[\)])?");
+            this.LineManager.RemoveLineIfRegexMatches(@"^[\a]?([\[\(](.*?)[\]\)])?[ ]{0,}([\w'-]+) got (.*?) by (.*?) ([\[\(] (.*?) [\]\)])?[ ]{0,}([\(]Arena[\)])?");
         }
 
         /// <summary>
@@ -417,10 +418,10 @@ namespace Avalon
                 "death cry."
             };
 
-            this.LineManager.RemoveIfContains(filterList, StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfRegex(@"^(You|Your)(\s)?(.*?)?(miss(es)?|scratch(es)?|graze(s)?|hit(s)?|injure(s)?|wound(s)?|maul(s)?|decimate(s)?|devastate(s)?|maim(s)?|MUTILATE(S)?|DISEMBOWEL(S)?|DISMEMBER(S)?|MASSACRE(S)?|MANGLE(S)?|\*\*\* DEMOLISH(ES)? \*\*\*|\*\*\* DEVASTATES \*\*\*|=== OBLITERATE(S)? ===|>>> ANNIHILATE(S)? <<<|<<< ERADICATE(S)? >>>|(does|do) HIDEOUS things to|(does|do) GHASTLY things to|(does|do) UNSPEAKABLE things to) (.*?)(\.|\!)");
-            this.LineManager.RemoveIfRegex(@"^(.*?)?(miss(es)?|scratch(es)?|graze(s)?|hit(s)?|injure(s)?|wound(s)?|maul(s)?|decimate(s)?|devastate(s)?|maim(s)?|MUTILATE(S)?|DISEMBOWEL(S)?|DISMEMBER(S)?|MASSACRE(S)?|MANGLE(S)?|\*\*\* DEMOLISH(ES)? \*\*\*|\*\*\* DEVASTATES \*\*\*|=== OBLITERATE(S)? ===|>>> ANNIHILATE(S)? <<<|<<< ERADICATE(S)? >>>|(does|do) HIDEOUS things to|(does|do) GHASTLY things to|(does|do) UNSPEAKABLE things to) (.*?)(\.|\!)");
-            this.LineManager.RemoveIfRegex(@"^(.*?)? (is in excellent condition|has a few scratches|has some small wounds and bruises|has quite a few wounds|has some big nasty wounds and scratches|looks pretty hurt|is in awful condition|is bleeding to death).");
+            this.LineManager.RemoveLineIfContains(filterList, StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfRegexMatches(@"^(You|Your)(\s)?(.*?)?(miss(es)?|scratch(es)?|graze(s)?|hit(s)?|injure(s)?|wound(s)?|maul(s)?|decimate(s)?|devastate(s)?|maim(s)?|MUTILATE(S)?|DISEMBOWEL(S)?|DISMEMBER(S)?|MASSACRE(S)?|MANGLE(S)?|\*\*\* DEMOLISH(ES)? \*\*\*|\*\*\* DEVASTATES \*\*\*|=== OBLITERATE(S)? ===|>>> ANNIHILATE(S)? <<<|<<< ERADICATE(S)? >>>|(does|do) HIDEOUS things to|(does|do) GHASTLY things to|(does|do) UNSPEAKABLE things to) (.*?)(\.|\!)");
+            this.LineManager.RemoveLineIfRegexMatches(@"^(.*?)?(miss(es)?|scratch(es)?|graze(s)?|hit(s)?|injure(s)?|wound(s)?|maul(s)?|decimate(s)?|devastate(s)?|maim(s)?|MUTILATE(S)?|DISEMBOWEL(S)?|DISMEMBER(S)?|MASSACRE(S)?|MANGLE(S)?|\*\*\* DEMOLISH(ES)? \*\*\*|\*\*\* DEVASTATES \*\*\*|=== OBLITERATE(S)? ===|>>> ANNIHILATE(S)? <<<|<<< ERADICATE(S)? >>>|(does|do) HIDEOUS things to|(does|do) GHASTLY things to|(does|do) UNSPEAKABLE things to) (.*?)(\.|\!)");
+            this.LineManager.RemoveLineIfRegexMatches(@"^(.*?)? (is in excellent condition|has a few scratches|has some small wounds and bruises|has quite a few wounds|has some big nasty wounds and scratches|looks pretty hurt|is in awful condition|is bleeding to death).");
         }
 
         private void RemoveSpells()
@@ -431,152 +432,152 @@ namespace Avalon
                 "cast "
             };
 
-            this.LineManager.RemoveIfStartsWith(cmds, StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(cmds, StringComparison.OrdinalIgnoreCase);
         }
 
         private void RemoveScore()
         {
-            this.LineManager.RemoveIfStartsWith(@"Score for ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"----------------------------------------------------------------------------", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"LEVEL: ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"YEARS: ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"SEX  : ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"STR  : ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"INT  : ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"WIS  : ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"DEX  : ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"CON  : ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"THA  :             Wimpy: ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"                   Wimpy: ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"BANK : ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"GOLD : ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"PRACT: ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"TRAIN: ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"XP   : ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"PK Trains: ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"Next PK loot change at: ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"                                              256 Color", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"Speaking: ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"Remaining Hostile Time: ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"Religion: ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"PKill: ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"PK Points: ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"You feel great.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You are a light sleeper.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You are exceptionally calm in combat.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You are exceptionally intelligent.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You have a good knowledge of weaponry.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You have an affinity to magic.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You are resistant to magic.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You are exceptionally agile.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You are large for your race.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You have a deep perception of beings.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You suffer from horrible nightmares.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You are completely insane.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You have an obsessive hatred for", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You are deaf.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You are vulnerable to magic.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You are illiterate.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You lost an arm in a childhood accident.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You cannot speak.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You suffer from a nervous tic.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith("You are exceptionally weak and frail.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"----------------------------------------------------------------------------", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"PROFESSION: Son of a God", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"----------------------------------------------------------------------------", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"Score for ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"----------------------------------------------------------------------------", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"LEVEL: ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"YEARS: ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"SEX  : ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"STR  : ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"INT  : ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"WIS  : ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"DEX  : ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"CON  : ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"THA  :             Wimpy: ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"                   Wimpy: ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"BANK : ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"GOLD : ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"PRACT: ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"TRAIN: ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"XP   : ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"PK Trains: ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"Next PK loot change at: ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"                                              256 Color", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"Speaking: ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"Remaining Hostile Time: ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"Religion: ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"PKill: ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"PK Points: ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"You feel great.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You are a light sleeper.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You are exceptionally calm in combat.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You are exceptionally intelligent.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You have a good knowledge of weaponry.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You have an affinity to magic.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You are resistant to magic.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You are exceptionally agile.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You are large for your race.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You have a deep perception of beings.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You suffer from horrible nightmares.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You are completely insane.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You have an obsessive hatred for", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You are deaf.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You are vulnerable to magic.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You are illiterate.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You lost an arm in a childhood accident.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You cannot speak.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You suffer from a nervous tic.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith("You are exceptionally weak and frail.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"----------------------------------------------------------------------------", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"PROFESSION: Son of a God", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"----------------------------------------------------------------------------", StringComparison.OrdinalIgnoreCase);
         }
 
         public void RemoveLoginScreen()
         {
-            this.LineManager.RemoveIfStartsWith(@"[ ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"Do you want color", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"Original DikuMUD by: Hans Staerfelt, Katja Nyboe, Tom Madsen, Michael", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"Seifert, Sebastian Hammer.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"Original MERC 2.1 by Hatchet, Furey, and Kahn.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"DSL Owned by Allen Games. (which is owned by Scorn)", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"DSL Web Site: http://www.dsl-mud.org", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"Various Snippets from SMAUG", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"                                   /   \", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@" _                         )      ((   ))     (", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"(@)                       /|\      ))_((     /|\                         _", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"|-|`\                    / | \    (/\|/\)   / | \                       (@)", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"| |---------------------/--|-voV---\`|'/--Vov-|--\----------------------|-|", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"|-|                          '^`   (o o)  '^`                           | |", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"| |                                `\Y/'                                |-|", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"|-|                                                                     | |", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"|-|                    DARK & SHATTERED LANDS (DSL)                     | |", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"| |                                                                     |-|", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"|-|                           [Implementor]                             | |", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"| |                               Scorn                                 |-|", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"|-|                        (scorn@dsl-mud.org)                          | |", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"|_|_____________________________________________________________________|-|", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"(@)                l   /\ /         ( (       \ /\   l                `\|_|", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"                   l /   V           \ \       V   \ l                  (@)", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"                   l/                _) )_          \I", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"                                     `\ /'                         ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"                                       ,", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"             Code:  DSL ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"           Based on ROM ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"[DSL] (Push Enter to Continue)", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@" ------===+*<==(  Dark and Shattered Lands: Main Login Menu )==>*+===------", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"    (C)reate a New Character", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"    (L)imited Race Creation", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"    (P)lay Existing Character", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"    (M)aster Account Login     ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"    (F)orm a New Master Account", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"    (W)ho is on now?", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"    (H)elpfiles", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"    (Q)uit", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"    Your selection? ->", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"(Existing Master Account)", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"What is your Master Account's name?", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"Password:", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@" ------===+*<==(  Dark and Shattered Lands: Master Login Menu )==>*+===------", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"Master account:", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"    (C)reate a New Character", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"    (V)iew Characters and Personal information", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"    (M)aster Account Password Change", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"    (E)mail and Personal Information Change", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"    (A)dd existing Character to Master  System Time", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"    (R)ewards menu", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"    (Q)uit to Main Menu", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@" ------===+*<==(  Dark and Shattered Lands: Master Character Logon )==>*+===------", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"   You can only log on a character attached to this master account.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"   To see that list hit enter then from the main menu hit: ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"   (V) to View Characters and Personal information.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"Player name:", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"*", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"WELCOME TO DARK & SHATTERED LANDS", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"-", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"When approaching a Red Dragon, be sure to bring your wand of marshmallow.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"Welcome to DSL! DSL Loves You! Other muds think you are ugly, they said so!  ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"[ ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"Do you want color", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"Original DikuMUD by: Hans Staerfelt, Katja Nyboe, Tom Madsen, Michael", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"Seifert, Sebastian Hammer.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"Original MERC 2.1 by Hatchet, Furey, and Kahn.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"DSL Owned by Allen Games. (which is owned by Scorn)", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"DSL Web Site: http://www.dsl-mud.org", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"Various Snippets from SMAUG", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"                                   /   \", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@" _                         )      ((   ))     (", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"(@)                       /|\      ))_((     /|\                         _", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"|-|`\                    / | \    (/\|/\)   / | \                       (@)", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"| |---------------------/--|-voV---\`|'/--Vov-|--\----------------------|-|", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"|-|                          '^`   (o o)  '^`                           | |", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"| |                                `\Y/'                                |-|", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"|-|                                                                     | |", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"|-|                    DARK & SHATTERED LANDS (DSL)                     | |", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"| |                                                                     |-|", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"|-|                           [Implementor]                             | |", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"| |                               Scorn                                 |-|", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"|-|                        (scorn@dsl-mud.org)                          | |", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"|_|_____________________________________________________________________|-|", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"(@)                l   /\ /         ( (       \ /\   l                `\|_|", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"                   l /   V           \ \       V   \ l                  (@)", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"                   l/                _) )_          \I", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"                                     `\ /'                         ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"                                       ,", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"             Code:  DSL ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"           Based on ROM ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"[DSL] (Push Enter to Continue)", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@" ------===+*<==(  Dark and Shattered Lands: Main Login Menu )==>*+===------", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"    (C)reate a New Character", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"    (L)imited Race Creation", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"    (P)lay Existing Character", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"    (M)aster Account Login     ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"    (F)orm a New Master Account", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"    (W)ho is on now?", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"    (H)elpfiles", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"    (Q)uit", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"    Your selection? ->", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"(Existing Master Account)", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"What is your Master Account's name?", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"Password:", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@" ------===+*<==(  Dark and Shattered Lands: Master Login Menu )==>*+===------", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"Master account:", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"    (C)reate a New Character", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"    (V)iew Characters and Personal information", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"    (M)aster Account Password Change", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"    (E)mail and Personal Information Change", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"    (A)dd existing Character to Master  System Time", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"    (R)ewards menu", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"    (Q)uit to Main Menu", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@" ------===+*<==(  Dark and Shattered Lands: Master Character Logon )==>*+===------", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"   You can only log on a character attached to this master account.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"   To see that list hit enter then from the main menu hit: ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"   (V) to View Characters and Personal information.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"Player name:", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"*", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"WELCOME TO DARK & SHATTERED LANDS", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"-", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"When approaching a Red Dragon, be sure to bring your wand of marshmallow.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"Welcome to DSL! DSL Loves You! Other muds think you are ugly, they said so!  ", StringComparison.OrdinalIgnoreCase);
 
-            this.LineManager.RemoveIfStartsWith(@"whoami", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"score", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"prompt ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"score", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"You are currently improving ", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfStartsWith(@"Syntax: improve <skillname> / improve none", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"whoami", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"score", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"prompt ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"score", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"You are currently improving ", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfStartsWith(@"Syntax: improve <skillname> / improve none", StringComparison.OrdinalIgnoreCase);
 
         }
 
         private void RemoveUnreadNotes()
         {
-            this.LineManager.RemoveIfContains("new news article waiting.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfContains("changes waiting to be read.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfContains("change waiting to be read.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfContains("new ooc note waiting", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfContains("new ooc notes waiting", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfContains("new notes waiting.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfContains("new note waiting.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfContains("new quest note waiting", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfContains("new quest notes waiting", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfContains("unread auctions.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfContains("unread auction.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfContains("story notes have been added.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfContains("story note have been added.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfContains("bloodbath notes have been added.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfContains("bloodbath note have been added.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains("new news article waiting.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains("changes waiting to be read.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains("change waiting to be read.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains("new ooc note waiting", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains("new ooc notes waiting", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains("new notes waiting.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains("new note waiting.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains("new quest note waiting", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains("new quest notes waiting", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains("unread auctions.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains("unread auction.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains("story notes have been added.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains("story note have been added.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains("bloodbath notes have been added.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains("bloodbath note have been added.", StringComparison.OrdinalIgnoreCase);
         }
 
         private void CreateRpLog()
@@ -589,30 +590,30 @@ namespace Avalon
             RemoveBattle();
             RemoveUnreadNotes();
 
-            this.LineManager.RemoveIfWordCountEquals(1);
-            this.LineManager.RemoveIfStartsWith(@"-->");
-            this.LineManager.RemoveIfStartsWith(@"[ (C)ontinue, (R)efresh, (B)ack, (H)elp, (E)nd, (T)op, (Q)uit, or RETURN ]");
-            this.LineManager.RemoveIfStartsWith(@"[Hit Return to continue]");
-            this.LineManager.RemoveIfStartsWith(@"You have become better at");
-            this.LineManager.RemoveIfStartsWith(@"You are logged in as:");
-            this.LineManager.RemoveIfStartsWith(@"<");
-            this.LineManager.RemoveIfStartsWith(@"You are using:");
-            this.LineManager.RemoveIfStartsWith(@"You are affected by the following spells:");
-            this.LineManager.RemoveIfStartsWith(@"You aren't currently on a quest.");
-            this.LineManager.RemoveIfStartsWith(@"There is less than a hour remaining until you can go on another quest.");
-            this.LineManager.RemoveIfStartsWith(@"Master account:");
-            this.LineManager.RemoveIfStartsWith(@"Personal Name: ");
-            this.LineManager.RemoveIfStartsWith(@"E-mail: ");
-            this.LineManager.RemoveIfStartsWith(@"Please press enter to get back to the master menu or enter character name to log");
-            this.LineManager.RemoveIfStartsWith(@"Player name:");
-            this.LineManager.RemoveIfContains("practice sessions left.", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfContains("You focus your training on", StringComparison.OrdinalIgnoreCase);
-            this.LineManager.RemoveIfContains(" : modifies");
-            this.LineManager.RemoveIfContains("Dark and Shattered Lands: ");
+            this.LineManager.RemoveLineIfWordCountEquals(1);
+            this.LineManager.RemoveLineIfStartsWith(@"-->");
+            this.LineManager.RemoveLineIfStartsWith(@"[ (C)ontinue, (R)efresh, (B)ack, (H)elp, (E)nd, (T)op, (Q)uit, or RETURN ]");
+            this.LineManager.RemoveLineIfStartsWith(@"[Hit Return to continue]");
+            this.LineManager.RemoveLineIfStartsWith(@"You have become better at");
+            this.LineManager.RemoveLineIfStartsWith(@"You are logged in as:");
+            this.LineManager.RemoveLineIfStartsWith(@"<");
+            this.LineManager.RemoveLineIfStartsWith(@"You are using:");
+            this.LineManager.RemoveLineIfStartsWith(@"You are affected by the following spells:");
+            this.LineManager.RemoveLineIfStartsWith(@"You aren't currently on a quest.");
+            this.LineManager.RemoveLineIfStartsWith(@"There is less than a hour remaining until you can go on another quest.");
+            this.LineManager.RemoveLineIfStartsWith(@"Master account:");
+            this.LineManager.RemoveLineIfStartsWith(@"Personal Name: ");
+            this.LineManager.RemoveLineIfStartsWith(@"E-mail: ");
+            this.LineManager.RemoveLineIfStartsWith(@"Please press enter to get back to the master menu or enter character name to log");
+            this.LineManager.RemoveLineIfStartsWith(@"Player name:");
+            this.LineManager.RemoveLineIfContains("practice sessions left.", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains("You focus your training on", StringComparison.OrdinalIgnoreCase);
+            this.LineManager.RemoveLineIfContains(" : modifies");
+            this.LineManager.RemoveLineIfContains("Dark and Shattered Lands: ");
 
             for (int i = 1; i < 250; i++)
             {
-                this.LineManager.RemoveIfStartsWith($"{i}. ");
+                this.LineManager.RemoveLineIfStartsWith($"{i}. ");
             }
         }
 
